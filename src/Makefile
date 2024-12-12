@@ -17,3 +17,8 @@ run_system: $(BUILD_DIR)/os-img.bin
 
 $(BUILD_DIR)/%.bin: %.asm
 	nasm $< -f bin -o $@
+
+clean:
+	rm -rf $(BUILD_DIR)/*
+
+

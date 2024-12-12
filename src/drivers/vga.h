@@ -26,7 +26,7 @@ enum vga_color {
 	VGA_COLOR_WHITE = 15,
 };
 
-static inline uint8_t change_cell_color(vga_color fg, vga_color bg)
+static inline uint8_t change_cell_color(enum vga_color fg, enum vga_color bg)
 {
 	return fg | bg << 4;
 }
@@ -37,12 +37,3 @@ static inline uint16_t change_text_cell(uint8_t uc, uint8_t color)
 }
 
 #endif
-
-/* #ifndef STRING_H
- * #define STRING_H
- * 
- * extern void * memcpy(void *, const void *, size_t); 
- * #endif
- *
- *
- */
