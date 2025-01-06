@@ -5,24 +5,17 @@
 #include "tty.h"
 #include "../drivers/vga.h"
 
-void ok()
-{
-	__asm__("hlt");
-}
-
 void kernel_main(void) 
 {
 	/* Initialize terminal interface */
-	terminal_init();
- 	
-	set_idt_gate(0, ok, 0x8E);
-	set_idt();
-
+	terminal_init();	
+	install_idt();
+		
 	/* Newline support is left as an exercise. */
 	terminal_printstring("hejo\n");
 	terminal_printstring("pozdrawiam Wojtka\n");
 
-	//int x = 2 / 0;
+	int x = 2 / 0;
 
 	terminal_printstring("SIEMA");
 }
