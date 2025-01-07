@@ -36,7 +36,9 @@ char *exception_messages[] = {
     "Reserved",
     "Reserved",
     "Reserved",
-    "Reserved"
+    "Reserved",
+    "Clock",
+    "Keyboard"
 };
 
 void isr_handler(register_t registers)

@@ -42,6 +42,7 @@ isr_wrapper:
 .global isr29
 .global isr30
 .global isr31
+.global isr33
 
 isr0: 
  cli
@@ -223,4 +224,10 @@ isr31:
  cli
  pushl $0
  pushl $31
- jmp isr_wrapper	
+ jmp isr_wrapper
+
+isr33:
+ cli
+ pushl $1
+ pushl $33
+ jmp isr_wrapper

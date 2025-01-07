@@ -13,8 +13,8 @@ void *memchr(const void *ptr, int value, size_t num)
 			}
 
 			p++;
-			n--;
-		} while(n != 0);
+			num--;
+		} while(num != 0);
 	}
 
 	return NULL;
