@@ -1,4 +1,6 @@
 #include "../kernel/tty.h"
+#include "../drivers/ports.h"
+#include "pic.h"
 #include "idt.h"
 
 char *exception_messages[] = {
@@ -43,6 +45,29 @@ char *exception_messages[] = {
 
 void isr_handler(register_t registers)
 {
-	terminal_printstring(exception_messages[registers.int_num]);
-	__asm__("hlt");
+	if(registers.int_num >= 32)
+	{
+		if(registers.err_num == 1)
+		{
+			terminal_printstring("KeyCode: ");
+			
+			//while(inb(0x64) & 0x01)
+			//{
+				uint8_t okp = inb(0x64);
+				uint8_t oki = inb(0x60);
+				terminal_printstring(oki + 32);
+				terminal_printstring("\n");
+			//}
+		}
+
+		if(registers.err_num >= 8)
+		{
+			outb(0x20, PIC2_COMMAND);
+		}
+
+		outb(0x20, PIC1_COMMAND);
+		//terminal_printstring("no co\n");
+	}
+	
+	//terminal_printstring(exception_messages[registers.int_num]);
 }

@@ -2,12 +2,7 @@
 #include "pic.h"
 
 void remap_pic(int irq1, int irq2)
-{
-	uint8_t a1, a2;
-
-	a1 = inb(PIC1_DATA);
-	a2 = inb(PIC2_DATA);
-	
+{	
 	/* start ICW1, to initialise PIC */
 	outb(0x11, PIC1_COMMAND);
 	io_wait();
@@ -32,8 +27,14 @@ void remap_pic(int irq1, int irq2)
 	outb(0x1, PIC2_DATA);
 	io_wait();
 
-	outb(a1, PIC1_DATA);
-	outb(a2, PIC2_DATA);
+	outb(0, PIC1_DATA);
+	io_wait();
+	outb(0, PIC2_DATA);
+	io_wait();
+
+	uint8_t mask = inb(PIC1_DATA);
+	mask &- ~(1 << 1);
+	outb(mask, PIC1_DATA);
 }
 
 

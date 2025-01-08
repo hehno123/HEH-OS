@@ -2,6 +2,7 @@
 #include "tty.h"
 #include <stddef.h>
 #include "../libc/include/string.h"
+#include "../drivers/keyboard.h"
 
 size_t terminal_row;
 size_t terminal_column;

@@ -25,12 +25,12 @@ powitanie:
 	int 0x13
 	jc error
 	
+	mov eax, cr0
+	mov eax, 0b1
+	mov cr0, eax
+
 	cli
 	lgdt [gdt_descriptor]
-
-	mov 	eax, cr0
-	or  	eax, 0b1
-	mov 	cr0, eax
 
 	jmp 0x08:reload
 

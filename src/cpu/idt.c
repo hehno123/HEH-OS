@@ -55,7 +55,22 @@ void install_idt()
 	set_idt_gate(29, (uint32_t)isr29, 0x8E);
 	set_idt_gate(30, (uint32_t)isr30, 0x8E);
 	set_idt_gate(31, (uint32_t)isr31, 0x8E);
+	set_idt_gate(32, (uint32_t)isr32, 0x8E);
 	set_idt_gate(33, (uint32_t)isr33, 0x8E);
+	set_idt_gate(34, (uint32_t)isr34, 0x8E);
+	set_idt_gate(35, (uint32_t)isr35, 0x8E);
+	set_idt_gate(36, (uint32_t)isr36, 0x8E);
+	set_idt_gate(37, (uint32_t)isr37, 0x8E);
+	set_idt_gate(38, (uint32_t)isr38, 0x8E);
+	set_idt_gate(39, (uint32_t)isr39, 0x8E);
+	set_idt_gate(40, (uint32_t)isr40, 0x8E);
+	set_idt_gate(41, (uint32_t)isr41, 0x8E);
+	set_idt_gate(42, (uint32_t)isr42, 0x8E);
+	set_idt_gate(43, (uint32_t)isr43, 0x8E);
+	set_idt_gate(44, (uint32_t)isr44, 0x8E);
+	set_idt_gate(45, (uint32_t)isr45, 0x8E);
+	set_idt_gate(46, (uint32_t)isr46, 0x8E);
+	set_idt_gate(47, (uint32_t)isr47, 0x8E);
 
 	set_idt();
 }

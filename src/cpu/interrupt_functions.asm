@@ -8,6 +8,8 @@ isr_wrapper:
 	cld
 	call isr_handler
 	popal
+	addl $8, %esp
+	sti
 	iret
 
 .global isr0
@@ -42,74 +44,77 @@ isr_wrapper:
 .global isr29
 .global isr30
 .global isr31
+.global isr32
 .global isr33
+.global isr34
+.global isr35
+.global isr36
+.global isr37
+.global isr38
+.global isr39
+.global isr40
+.global isr41
+.global isr42
+.global isr43
+.global isr44
+.global isr45
+.global isr46
+.global isr47
 
 isr0: 
- cli
  pushl $0
  pushl $0
  jmp isr_wrapper
 
 isr1: 
- cli
  pushl $0
  pushl $1
  jmp isr_wrapper
 
 isr2: 
- cli
  pushl $0
  pushl $2
  jmp isr_wrapper
 
 isr3: 
- cli
  pushl $0
  pushl $3
  jmp isr_wrapper
 
 isr4: 
- cli
  pushl $0
  pushl $4
  jmp isr_wrapper
 
 isr5: 
- cli
  pushl $0
  pushl $5
  jmp isr_wrapper
 
 isr6: 
- cli
  pushl $0
  pushl $6
  jmp isr_wrapper
 
 isr7: 
- cli
  pushl $0
  pushl $7
  jmp isr_wrapper
 
 isr8: 
- cli
  pushl $8
  jmp isr_wrapper
 
 isr9: 
- cli
  pushl $0
  pushl $9
  jmp isr_wrapper
 
 isr10: 
- cli
  pushl $10
  jmp isr_wrapper
 
 isr11: 
- cli
  pushl $11
  jmp isr_wrapper
 
@@ -226,8 +231,76 @@ isr31:
  pushl $31
  jmp isr_wrapper
 
+isr32: 
+    pushl $0 
+    pushl $32 
+    jmp isr_wrapper
 isr33:
- cli
- pushl $1
- pushl $33
- jmp isr_wrapper
+    cli  
+    pushl $1 
+    pushl $33 
+    jmp isr_wrapper
+isr34:  
+    pushl $2 
+    pushl $34 
+    jmp isr_wrapper
+isr35:  
+    pushl $3 
+    pushl $35 
+    jmp isr_wrapper
+isr36:  
+    pushl $4 
+    pushl $36 
+    jmp isr_wrapper
+isr37:  
+    pushl $5 
+    pushl $37 
+    jmp isr_wrapper
+isr38:  
+    pushl $6 
+    pushl $38 
+    jmp isr_wrapper
+isr39:  
+    pushl $7 
+    pushl $39 
+    jmp isr_wrapper
+isr40: 
+    cli 
+    pushl $8 
+    pushl $40 
+    jmp isr_wrapper
+isr41: 
+    cli 
+    pushl $9 
+    pushl $41 
+    jmp isr_wrapper
+isr42: 
+    cli 
+    pushl $10 
+    pushl $42 
+    jmp isr_wrapper
+isr43: 
+    cli 
+    pushl $11 
+    pushl $43 
+    jmp isr_wrapper
+isr44: 
+    cli 
+    pushl $12 
+    pushl $44 
+    jmp isr_wrapper
+isr45: 
+    cli 
+    pushl $13 
+    pushl $45 
+    jmp isr_wrapper
+isr46: 
+    cli 
+    pushl $14 
+    pushl $46 
+    jmp isr_wrapper
+isr47: 
+    cli 
+    pushl $15 
+    pushl $47 
+    jmp isr_wrapper

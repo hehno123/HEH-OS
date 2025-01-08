@@ -8,6 +8,6 @@
 
 #include <stdint.h>
 
-void pic_remap(int, int);
+extern void remap_pic(int, int);
 
 #endif
