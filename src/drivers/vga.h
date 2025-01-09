@@ -36,4 +36,10 @@ static inline uint16_t change_text_cell(uint8_t uc, uint8_t color)
 	return (uint16_t) uc | (uint16_t) color << 8;
 }
 
+
+void vga_enable_cursor(uint8_t, uint8_t);
+void vga_disable_cursor();
+void vga_update_cursor(uint16_t, uint16_t);
+uint16_t vga_get_cursor_position();
+
 #endif

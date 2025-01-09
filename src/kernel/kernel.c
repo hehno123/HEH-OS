@@ -11,17 +11,13 @@ void kernel_main(void)
 {
 	/* Initialize terminal interface */
 	terminal_init();
-	remap_pic(0x20, 0x28);
 	keyboard_init();
+	remap_pic(0x20, 0x28);
 	install_idt();
 
 	__asm__ volatile("sti");
-	
+		
 	/* Newline support is left as an exercise. */
-	terminal_printstring("hejo\n");
-	terminal_printstring("pozdrawiam Wojtka\n");
-	//int x = 2 / 0;
-
-	terminal_printstring("SIEMA");
+	terminal_printstring("hejo\nsiema to ja hehno 123\nasdf ok to znowu ja");
 }
 

@@ -33,7 +33,7 @@ void remap_pic(int irq1, int irq2)
 	io_wait();
 
 	uint8_t mask = inb(PIC1_DATA);
-	mask &- ~(1 << 1);
+	mask &= ~(1 << 1);
 	outb(mask, PIC1_DATA);
 }
 

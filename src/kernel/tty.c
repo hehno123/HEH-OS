@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include "../libc/include/string.h"
 #include "../drivers/keyboard.h"
+#include <stdarg.h>
 
 size_t terminal_row;
 size_t terminal_column;
@@ -43,7 +44,7 @@ void terminal_init()
 	terminal_column = 0;
 	terminal_color = change_cell_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
 	cell_address = (uint16_t*)(VGA_ADDRESS);
-
+	vga_enable_cursor(0,0);
 	terminal_clear();
 }
 
@@ -84,4 +85,26 @@ void terminal_writedata(char* data, size_t size)
 void terminal_printstring(char* data)
 {
 	terminal_writedata(data, strlen(data));
+	vga_update_cursor(terminal_column, terminal_row + 1);
 }
+
+void kprint(char* format, ...)
+{
+	va_list args;
+	va_start(args, format);
+
+	while(*format != '\0')
+	{
+		//check if %, to get format
+		if(*format == '%')
+		{
+			*format++;
+			
+			if(*format == 'd')
+			{
+				int32_t value = va_arg(args, int32_t);
+			}
+		}
+	}
+}
+

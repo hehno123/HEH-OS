@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-static inline uint8_t inb(uint8_t port)
+static inline uint8_t inb(uint32_t port)
 {
 	uint8_t res;
 
@@ -11,7 +11,7 @@ static inline uint8_t inb(uint8_t port)
 	return res;
 }
 
-static inline uint16_t inw(uint16_t port)
+static inline uint16_t inw(uint32_t port)
 {
 	uint16_t res;
 
@@ -27,12 +27,12 @@ static inline uint32_t inl(uint32_t port)
 	return res;
 }
 
-static inline uint8_t outb(uint8_t val, uint8_t port)
+static inline uint8_t outb(uint8_t val, uint32_t port)
 {
 	__asm__ volatile("outb %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
 }
 
-static inline uint16_t outw(uint16_t val, uint16_t port)
+static inline uint16_t outw(uint16_t val, uint32_t port)
 {
 	__asm__ volatile("outw %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
 }
@@ -44,7 +44,7 @@ static inline uint32_t outl(uint32_t val, uint32_t port)
 
 static inline void io_wait(void)
 {
-    outb(0x80, 0);
+    outb(0x80, 0x80);
 }
 
 #endif

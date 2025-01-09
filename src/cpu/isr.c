@@ -48,16 +48,16 @@ void isr_handler(register_t registers)
 	if(registers.int_num >= 32)
 	{
 		if(registers.err_num == 1)
-		{
-			terminal_printstring("KeyCode: ");
-			
-			//while(inb(0x64) & 0x01)
-			//{
-				uint8_t okp = inb(0x64);
+		{	
+			if(inb(0x64) & 0x01)
+			{
+				io_wait();
 				uint8_t oki = inb(0x60);
-				terminal_printstring(oki + 32);
-				terminal_printstring("\n");
-			//}
+				io_wait();
+				
+				if(oki == 0x04)
+					terminal_printstring("3");
+			}
 		}
 
 		if(registers.err_num >= 8)
@@ -66,7 +66,7 @@ void isr_handler(register_t registers)
 		}
 
 		outb(0x20, PIC1_COMMAND);
-		//terminal_printstring("no co\n");
+		io_wait();
 	}
 	
 	//terminal_printstring(exception_messages[registers.int_num]);
