@@ -88,7 +88,7 @@ void terminal_printstring(char* data)
 	vga_update_cursor(terminal_column, terminal_row + 1);
 }
 
-void kprint(char* format, ...)
+void kprintf(char* format, ...)
 {
 	va_list args;
 	va_start(args, format);
@@ -103,6 +103,20 @@ void kprint(char* format, ...)
 			if(*format == 'd')
 			{
 				int32_t value = va_arg(args, int32_t);
+				char buf[20];
+				int curr = 0;
+
+				while(value != 0)
+				{
+					buf[curr] = (char)((value % 10) + 48);
+					curr++;
+					value /= 10;
+				}
+				
+				buf[curr] = '\0';
+				strrev(buf);
+
+				terminal_printstring(buf);
 			}
 		}
 	}

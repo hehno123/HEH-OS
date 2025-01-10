@@ -18,6 +18,7 @@ void kernel_main(void)
 	__asm__ volatile("sti");
 		
 	/* Newline support is left as an exercise. */
-	terminal_printstring("hejo\nsiema to ja hehno 123\nasdf ok to znowu ja");
+	terminal_printstring("hejo\nsiema to ja hehno 123\nasdf ok to znowu ja\n");
+	kprintf("%d", 123);	
 }
 

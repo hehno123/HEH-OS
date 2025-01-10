@@ -17,5 +17,6 @@ int strcmp(const char*, const char*);
 int strncmp(const char*, const char*, size_t);
 const char* strchr(const char*, int);
 size_t strcspn(const char*, const char*);
+char* strrev(char*);
 
 #endif
