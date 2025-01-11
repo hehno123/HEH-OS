@@ -24,7 +24,57 @@ powitanie:
 	mov si, os_packet
 	int 0x13
 	jc error
+	 
+	mov eax, 0xE820 ;function call
+	xor ebx, ebx ;must be zero
+	xor bp, bp ;keep track of counts
+	mov di, 0x8004 ;memory location to store
+	mov edx, 0x534D4150 ;SMAP signature
+	mov dword[es:di + 20], 1 ;get additional information
+	mov ecx, 24 ;request 24 bytes of data
+	int 0x15
 	
+	jc memory_err ;if carry flag, it indicates memory error
+	mov edx, 0x534D4150
+	cmp eax, edx
+	jnz memory_err
+	test ebx, ebx
+	je memory_err
+	jmp check_zero
+
+get_memory:
+	mov eax, 0xE820
+	mov dword[es:di + 20], 1
+	mov ecx, 24
+	int 0x15
+	jc finish_memory
+
+	mov edx, 0x534D4150
+check_zero:
+	jcxz skip_entry ;if exc = 0, then skip entry
+	cmp cl, 20
+	jbe check_len; ecx > 20
+	test byte[es:di + 20], 1
+	je skip_entry
+
+check_len:
+	mov eax, [es:di + 8] ;get lower address
+	mov ecx, [es:di + 12] ;get higher address
+	or eax, ecx
+	jz skip_entry
+	
+	inc bp
+	add di, 24
+
+skip_entry:
+	test ebx, ebx
+	jne get_memory
+
+finish_memory:
+	mov [es:0x8000], bp
+	clc
+
+gdt_setup:
 	mov eax, cr0
 	mov eax, 0b1
 	mov cr0, eax
@@ -85,10 +135,15 @@ error:
 	hlt
 	jmp 	.loop
 
+memory_err:
+	mov bp, 3
+	jmp error
+
 error_list:
 err_LBA  db    "00 LBA not supported          "	
 err_PCK  db    "00 Ext read err occured       "	
 err_APM  db    "00 APM not supported          "
+err_MAP  db    "00 Memory map layout error    "
 
 gdt_start: 
     dd 0x0 

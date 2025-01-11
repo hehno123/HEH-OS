@@ -6,6 +6,7 @@
 #include "tty.h"
 #include "../drivers/vga.h"
 #include "../drivers/ports.h"
+#include "mem.h"
 
 void kernel_main(void) 
 {
@@ -16,9 +17,28 @@ void kernel_main(void)
 	install_idt();
 
 	__asm__ volatile("sti");
-		
-	/* Newline support is left as an exercise. */
-	terminal_printstring("hejo\nsiema to ja hehno 123\nasdf ok to znowu ja\n");
-	kprintf("%d", 123);	
+	   	
+	int* ptr = (short*)(0x8000);
+	int len = *ptr;
+	
+	int* mem_struct_ptr = (int*)(0x8004);
+	
+	for(int i = 0; i < len; i++)
+	{
+		addr_range_descr_t* mem_desc = (struct addr_range_descr_t*)(mem_struct_ptr);
+		uint64_t base_addr = ((uint64_t)(mem_desc->base_addr_high) << 31) | mem_desc->base_addr_low;
+		uint64_t len = ((uint64_t)(mem_desc->length_high) << 31) | mem_desc->length_low;
+
+	        kprintf("%d, addr: ", i);
+		printl(base_addr);
+		kprintf(", length: ");
+		printl(len);
+		kprintf(", type: ");
+		printl(mem_desc->type);
+		kprintf("\n");
+		//%l\n", i, base_addr, len, mem_desc->type);
+		mem_struct_ptr += 6;
+	}
+	
 }
 
