@@ -13,34 +13,35 @@ uint16_t* cell_address;
 uint64_t __udivdi3(uint64_t a, uint64_t b) {
     
 	 uint64_t quotient = 0;
-    uint64_t remainder = 0;
+    	uint64_t remainder = 0;
 
-    for (int i = 63; i >= 0; i--) {
-        remainder = (remainder << 1) | ((a >> i) & 1);  // Shift left and bring down the next bit
-        if (remainder >= b) {
-            remainder -= b;
-            quotient |= (1ULL << i);
-        }
-    }
+    	for (int i = 63; i >= 0; i--) {
+        	remainder = (remainder << 1) | ((a >> i) & 1);  // Shift left and bring down the next bit
+        	if (remainder >= b) {
+            		remainder -= b;
+            		quotient |= (1ULL << i);
+        	}
+    	}
 
-    return quotient;  // Remainder is also available if needed
+    	return quotient;  // Remainder is also available if needed
 }
 
 uint64_t __umoddi3(uint64_t a, uint64_t b)
 {
-    uint64_t quotient = 0;
-    uint64_t remainder = 0;
+    	uint64_t quotient = 0;
+    	uint64_t remainder = 0;
 
-    for (int i = 63; i >= 0; i--) {
-        remainder = (remainder << 1) | ((a >> i) & 1);  // Shift left and bring down the next bit
-        if (remainder >= b) {
-            remainder -= b;
-            quotient |= (1ULL << i);
-        }
-    }
+    	for (int i = 63; i >= 0; i--) {
+        	remainder = (remainder << 1) | ((a >> i) & 1);  // Shift left and bring down the next bit
+        	if (remainder >= b) {
+            		remainder -= b;
+            		quotient |= (1ULL << i);
+        	}
+    	}
 
-    return remainder;  // Remainder is also available if needed
+    	return remainder;  // Remainder is also available if needed
 }
+
 void terminal_scroll()
 {
 	for(size_t i = 0; i < MAX_ROWS - 1; i++)
@@ -118,7 +119,38 @@ void terminal_writedata(char* data, size_t size)
 void terminal_printstring(char* data)
 {
 	terminal_writedata(data, strlen(data));
-	//vga_update_cursor(terminal_column, terminal_row + 1);
+}
+
+char get_character(char c)
+{
+	if(c <= 9)
+		return (c + 48);
+	
+	if(c >= 10 && c <= 16)
+		return (char)('A' + (char)(c - 10));
+
+	return 0;
+}
+
+void format_str(int64_t num, char system, char sign, char* buf)
+{
+	int curr = 0;
+	char num_sign = (num >= 0) ? '\0' : '-';
+	uint64_t temp_val = (num < 0) ? (uint64_t)(~num + 1) : (uint64_t)(num);
+	
+	do
+	{
+		buf[curr] = get_character((char)(temp_val % system));
+		curr++;
+		temp_val /= system;
+	} while(temp_val != 0);
+
+	buf[curr] = num_sign;
+
+	if(sign && num_sign != '\0')
+		buf[curr + 1] = '\0';
+	
+	strrev(buf);
 }
 
 void kprintf(char* format, ...)
@@ -135,72 +167,44 @@ void kprintf(char* format, ...)
 		if(*format == '%')
 		{
 			format++;
+			char buf[30];
+			char is_num_format = 0;
+
+			if(*format == 'd' || *format == 'i')
+			{
+				int32_t value = va_arg(args, int32_t);
+				format_str((int64_t)(value), 10, 1, buf);
+				is_num_format = 1;
+			}
 			
-			if(*format == 'd')
+			else if(*format == 'X')
+			{
+				int32_t value = va_arg(args, int32_t);
+				format_str((int64_t)(value), 16, 1, buf);
+				is_num_format = 1;
+			}
+
+			else if (*format == 'l') 
+			{
+    				int64_t value = va_arg(args, int64_t);
+				format_str(value, 16, 1, buf);
+				is_num_format = 1;
+			}
+			
+			else
+			{
+				curr_len += 1;
+			}
+
+			if(is_num_format)
 			{
 				terminal_writedata(temp_format, curr_len);
-				int32_t value = va_arg(args, int32_t);
-				char buf[20];
-				int curr = 0;
-				char sign = (value >= 0) ? '\0' : '-';
-
-				do
-				{
-					buf[curr] = (char)((value % 10) + 48);
-					curr++;
-					value /= 10;
-				} while(value != 0);
-				
-				buf[curr] =  sign;
-
-				if(sign != '\0')
-					buf[curr + 1] = '\0';
-
-				strrev(buf);
 				terminal_printstring(buf);
 				format++;
 				temp_format = format;
 				curr_len = 0;
 			}
-			
-			else if (*format == 'l') 
-			{
-    				terminal_writedata(temp_format, curr_len);
-    				unsigned long long value = va_arg(args, unsigned long long);
-    				char buf[50];
-    				int curr = 0;
-    				char sign = (value < 0) ? '-' : '\0';
-    				
-				if (value < 0) {
-        				value = -value;  // Convert to positive for easier handling
-    				}
 
-    				do {
-					char mod = (char)(value % 10);
-        				buf[curr] = (char)(mod + 48);
-        				curr++;
-        				value /= 10;
-    				} while (value != 0);
-
-    				if (sign != '\0') {
-        				buf[curr] = sign;
-        				curr++;
-    				}
-
-    				buf[curr] = '\0';  // Ensure null termination
-    				strrev(buf);       // Reverse the string
-    				terminal_printstring(buf);
-
-    				format++;
-    				temp_format = format;
-    				curr_len = 0;
-			}
-
-
-			else
-			{
-				curr_len += 1;
-			}
 		}
 
 		else
@@ -212,34 +216,4 @@ void kprintf(char* format, ...)
 	
 	terminal_writedata(temp_format, curr_len);
 	va_end(args);
-}
-
-void printl(uint64_t value)
-{
-		//else if (*format == 'l') 
-		//	{
-    				char buf[50];
-    				int curr = 0;
-    				char sign = (value < 0) ? '-' : '\0';
-    				
-				if (value < 0) {
-        				value = -value;  // Convert to positive for easier handling
-    				}
-
-    				do {
-					char mod = (char)(value % 10);
-        				buf[curr] = (char)(mod + 48);
-        				curr++;
-        				value /= 10;
-    				} while (value != 0);
-
-    				if (sign != '\0') {
-        				buf[curr] = sign;
-        				curr++;
-    				}
-
-    				buf[curr] = '\0';  // Ensure null termination
-    				strrev(buf);       // Reverse the string
-    				terminal_printstring(buf);
-		//	}
 }

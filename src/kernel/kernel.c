@@ -29,14 +29,7 @@ void kernel_main(void)
 		uint64_t base_addr = ((uint64_t)(mem_desc->base_addr_high) << 31) | mem_desc->base_addr_low;
 		uint64_t len = ((uint64_t)(mem_desc->length_high) << 31) | mem_desc->length_low;
 
-	        kprintf("%d, addr: ", i);
-		printl(base_addr);
-		kprintf(", length: ");
-		printl(len);
-		kprintf(", type: ");
-		printl(mem_desc->type);
-		kprintf("\n");
-		//%l\n", i, base_addr, len, mem_desc->type);
+	        kprintf("%d, addr: 0x%l, len: 0x%l, type: 0x%l\n", i, base_addr, len, mem_desc->type);
 		mem_struct_ptr += 6;
 	}
 	

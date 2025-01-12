@@ -16,7 +16,7 @@ $(BUILD_DIR)/os-img.bin: $(BUILD_DIR)/boot.bin $(BUILD_DIR)/kernel.bin $(BUILD_D
 	cat $^ > $@
 
 run_system: $(BUILD_DIR)/os-img.bin
-	qemu-system-i386 -hda $< -s -S -monitor stdio
+	qemu-system-i386 -hda $< -s -S -m 4096 -monitor stdio
 
 $(BUILD_DIR)/%.bin: %.asm
 	nasm $< -g -f bin -o $@
