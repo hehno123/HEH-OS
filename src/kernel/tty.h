@@ -15,4 +15,7 @@ void terminal_printstring(char* data);
 void terminal_writedata(char* data, size_t size);
 void kprintf(char*, ...);
 
+uint64_t __udivdi3(uint64_t, uint64_t);
+uint64_t __umoddi3(uint64_t, uint64_t);
+
 #endif

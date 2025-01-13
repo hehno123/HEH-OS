@@ -7,7 +7,7 @@ $(BUILD_DIR)/entry.o: entry.asm
 	nasm -g -f elf $< -o $@
 
 $(BUILD_DIR)/kernel.bin: $(BUILD_DIR)/entry.o ${C_OBJECTS}
-	i386-elf-ld -o $@ -Ttext 0x10000 $^ --oformat binary
+	i386-elf-ld -o $@ -T linker.ld $^ --oformat binary
 
 $(BUILD_DIR)/kernel.elf: $(BUILD_DIR)/entry.o ${C_OBJECTS}
 	i386-elf-ld -g -o $@ -Ttext 0x10000 $^

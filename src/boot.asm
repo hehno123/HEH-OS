@@ -11,14 +11,22 @@ powitanie:
 	mov ds, cx
 	mov es, cx
 	mov bp, cx
-
+	
+	in al, 0x92
+	or al, 0x02      ; Enable A20 line
+	and al, 0xFE     ; Clear bit 0
+	out 0x92, al
+	in al, 0x92      ; Read back to verify
+	test al, 0x02    ; Check if A20 is active
+	jz error
+	
 	mov ah, 0x41
 	mov bx, 0x55AA
 	mov dl, 0x80
 	int 0x13
 	jc error
 	inc bp
-
+	
 	mov ah, 0x42
 	mov dl, 0x80
 	mov si, os_packet
@@ -75,12 +83,12 @@ finish_memory:
 	clc
 
 gdt_setup:
+	cli
+	lgdt [gdt_descriptor]
+	
 	mov eax, cr0
 	mov eax, 0b1
 	mov cr0, eax
-
-	cli
-	lgdt [gdt_descriptor]
 
 	jmp 0x08:reload
 
@@ -92,15 +100,14 @@ reload:
 	mov fs, ax
 	mov gs, ax
 	mov ss, ax
-
-	;set up the stack
-	mov ebp, 0x90000
-	mov esp, ebp
 	
 	;enable the A20 line
-	in al, 0x92
-	or al, 0x02
-	out 0x92, al
+	;in al, 0x92
+	;or al, 0x02
+	;out 0x92, al
+	
+	mov ebp, 0x90000
+	mov esp, ebp
 
 	;jump to kernel location
 	call 0x08:0x10000
@@ -150,20 +157,27 @@ gdt_start:
     dd 0x0
 
 gdt_code: 
-    dw 0xffff    
-    dw 0x0      
-    db 0x0       
-    db 10011010b 
-    db 11001111b 
-    db 0x0       
+ ;   dw 0xffff    
+  ;  dw 0x0      
+  ;  db 0x0       
+  ;  db 10011010b 
+  ;  db 11001111b 
+  ;  db 0x0 
+     	dw 0xFFFF ;16 bits limit
+     	dw 0x0 ;base - 16 bits
+	db 0x0
+	db 0x9A
+	db 11001111b
+	db 0x0
+           
 
 gdt_data:
-    dw 0xffff
-    dw 0x0
-    db 0x0
-    db 10010010b
-    db 11001111b
-    db 0x0
+    	dw 0xFFFF
+    	dw 0x0
+    	db 0x0
+    	db 0x92
+    	db 11001111b
+    	db 0x0
 
 gdt_end:
 
@@ -174,8 +188,8 @@ gdt_descriptor:
 align 	16
 os_packet	db	0x10
             	db	0x0
-            	dw	0x15
-            	dw      0x0000, 0x1000	
+            	dw	0x20
+            	dw 	0x0, 0x1000
             	dq	0x1
 
 times 510 - ($-$$) db 0
