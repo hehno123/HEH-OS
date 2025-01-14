@@ -7,10 +7,10 @@ $(BUILD_DIR)/entry.o: entry.asm
 	nasm -g -f elf $< -o $@
 
 $(BUILD_DIR)/kernel.bin: $(BUILD_DIR)/entry.o ${C_OBJECTS}
-	i386-elf-ld -o $@ -T linker.ld $^ --oformat binary
+	i386-elf-gcc -o $@ -T linker.ld -ffreestanding -nostdlib $^ -lgcc
 
 $(BUILD_DIR)/kernel.elf: $(BUILD_DIR)/entry.o ${C_OBJECTS}
-	i386-elf-ld -g -o $@ -Ttext 0x10000 $^
+	i386-elf-gcc -ffreestanding -nostdlib -g -o $@ -Ttext 0x10000 $^ -lgcc
 
 $(BUILD_DIR)/os-img.bin: $(BUILD_DIR)/boot.bin $(BUILD_DIR)/kernel.bin $(BUILD_DIR)/zeroes.bin
 	cat $^ > $@

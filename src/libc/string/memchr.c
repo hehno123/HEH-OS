@@ -2,16 +2,13 @@
 
 void *memchr(const void *ptr, int value, size_t num)
 {
-	if(num > 0)
-	{
+	if (num > 0) {
 		const uint8_t *p = ptr;
 
 		do {
-			if(*p == (uint8_t)(value))
-			{
+			if (*p == (uint8_t)(value))
 				return ((void *)(p)); 
-			}
-
+			
 			p++;
 			num--;
 		} while(num != 0);

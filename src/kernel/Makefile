@@ -7,5 +7,6 @@ all: make_dir $(C_OBJECTS)
 
 make_dir:
 	mkdir -p $(BUILD_DIR)
+
 $(BUILD_DIR)/%.o: %.c
 	i386-elf-gcc -g -ffreestanding -c $< -o $@

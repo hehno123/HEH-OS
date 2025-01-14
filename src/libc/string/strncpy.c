@@ -2,13 +2,12 @@
 
 char *strncpy(char *destination, const char* source, size_t num)
 {
-	if(num > 0)
-	{
+	if (num > 0) {
 		char* dst = destination;
 		char* src = (char *)(source);
 		char padding = 0;
 
-		do
+		do 
 		{
 			if(*src == '\0')
 				padding = 1;

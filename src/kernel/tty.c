@@ -10,38 +10,6 @@ size_t terminal_column;
 uint8_t terminal_color;
 uint16_t* cell_address;
 
-uint64_t __udivdi3(uint64_t a, uint64_t b) {
-    
-	 uint64_t quotient = 0;
-    	uint64_t remainder = 0;
-
-    	for (int i = 63; i >= 0; i--) {
-        	remainder = (remainder << 1) | ((a >> i) & 1);  // Shift left and bring down the next bit
-        	if (remainder >= b) {
-            		remainder -= b;
-            		quotient |= (1ULL << i);
-        	}
-    	}
-
-    	return quotient;  // Remainder is also available if needed
-}
-
-uint64_t __umoddi3(uint64_t a, uint64_t b)
-{
-    	uint64_t quotient = 0;
-    	uint64_t remainder = 0;
-
-    	for (int i = 63; i >= 0; i--) {
-        	remainder = (remainder << 1) | ((a >> i) & 1);  // Shift left and bring down the next bit
-        	if (remainder >= b) {
-            		remainder -= b;
-            		quotient |= (1ULL << i);
-        	}
-    	}
-
-    	return remainder;  // Remainder is also available if needed
-}
-
 void terminal_scroll()
 {
 	for(size_t i = 0; i < MAX_ROWS - 1; i++)

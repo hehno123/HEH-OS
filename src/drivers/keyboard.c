@@ -1,32 +1,38 @@
 #include "keyboard.h"
 
+/*
+ * Initalize PS/2 controller
+ */
+
 void keyboard_init()
 {
-    // Disable devices connected to PS/2
-    outb(0xAD, 0x64); // Disable first PS/2 port
-    io_wait();
-    outb(0xA7, 0x64); // Disable second PS/2 port
-    io_wait();
+    	/* Disable devices connected to PS/2 */
+	outb(0xAD, KEY_COMM_PORT);
+	io_wait();
+	outb(0xA7, KEY_COMM_PORT);
+	io_wait();
 
-    // Flush the output buffer (0x60) if status indicates it is full
-    while (inb(0x64) & 0x01) {
-        (void)inb(0x60); // Read and discard the data
-    }
-    io_wait();
+	/* Flush the output buffer */
+	while (inb(KEY_STAT_PORT) & 0x01) {
+        	(void)inb(KEY_DATA_PORT);
+    	}
 
-    // Read the current configuration byte
-    outb(0x20, 0x64);       // Request configuration byte
-    while(!(inb(0x64) & 0x01));
-    uint8_t config_byte = inb(0x60);
+    	io_wait();
 
-    // Modify the configuration byte to disable translation and enable interrupts
-    config_byte &= ~0x20;   // Clear translation bit
-    config_byte |= 0x01;    // Enable interrupts for the first PS/2 port
-    outb(0x60, 0x64);       // Write configuration byte command
-    
-    while(inb(0x64) & 0x02);
-    outb(config_byte, 0x60);// Write modified configuration byte
+    	/* Read the current configuration byte */
+    	outb(0x20, KEY_COMM_PORT);
+    	while (!(inb(KEY_STAT_PORT) & 0x01));
+    	uint8_t config_byte = inb(KEY_DATA_PORT);
+
+    	/* Modify PS/2 configuration bytes and enable interrupts */
+    	config_byte &= ~0x20;   
+    	config_byte |= 0x01;    
+    	outb(0x60, KEY_COMM_PORT);
+    	
+	/* Write configuration bytes */
+    	while(inb(KEY_STAT_PORT) & 0x02);
+    	outb(config_byte, KEY_DATA_PORT);
 	
-    outb(0xAE, 0x64); 
+    	outb(0xAE, KEY_COMM_POR); 
 }
 

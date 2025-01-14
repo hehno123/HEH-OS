@@ -20,12 +20,17 @@ void kernel_main(void)
 
 	__asm__ volatile("sti");
 	   		
-	//initalize PMM manager
-	mem_PMM_init((uint32_t)(&_end));
+	/* initalize PMM manager */
+	mem_pmm_init((uint32_t)(&_end));
 	kprintf("FIRST FREE PAGE: %X\n", (int32_t)(*(&_end - 1)));
 	kprintf("SECOND FREE PAGE %X\n", (int32_t)(*(&_end + MEM_PAGE_SIZE)));
 	kprintf("PAGE AT 0x100000 %X\n", (int32_t)(*(uint32_t*)(0x100000)));
 	kprintf("PAGE AT 0x9E000 %X\n", (int32_t)(*(uint32_t*)(0x9E000)));
-
+	
+	for (int i = 0; i < 5; i++)	
+		kprintf("%d PAGE ALLOCATED: %X\n", i + 1, mem_palloc((uint32_t*)(&_end - 1)));
+	
+	//for (int i = 0; i < 5; i++)
+	kprintf("PAGE FREED: %X\n", mem_free((uint32_t*)(0x14000)));
 }
 

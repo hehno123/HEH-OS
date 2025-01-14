@@ -45,12 +45,10 @@ char *exception_messages[] = {
 
 void isr_handler(register_t registers)
 {
-	if(registers.int_num >= 32)
-	{
-		if(registers.err_num == 1)
-		{	
-			if(inb(0x64) & 0x01)
-			{
+	if (registers.int_num >= 32) {
+		if (registers.err_num == 1) {	
+			
+			if (inb(0x64) & 0x01) {
 				io_wait();
 				uint8_t oki = inb(0x60);
 				io_wait();
@@ -60,8 +58,7 @@ void isr_handler(register_t registers)
 			}
 		}
 
-		if(registers.err_num >= 8)
-		{
+		if (registers.err_num >= 8) {
 			outb(0x20, PIC2_COMMAND);
 		}
 
@@ -69,5 +66,4 @@ void isr_handler(register_t registers)
 		io_wait();
 	}
 	
-	//terminal_printstring(exception_messages[registers.int_num]);
 }

@@ -6,12 +6,9 @@ char *strncat(char *destination, const char* source, size_t num)
 	char *src = (char *)(source);
 
 	while(*dst != '\0')
-	{
 		dst++;
-	}
 
-	while(*dst != '\0' || num != 0)
-	{
+	while (*dst != '\0' || num != 0) {
 		*dst = *src;
 		
 		*dst++;
