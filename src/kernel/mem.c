@@ -12,7 +12,7 @@ void mem_pmm_init(uint32_t end_of_kernel)
 {
 	int* ptr = (short*)(MEM_MAP_LEN_ADDR);
 	int len = *ptr;
-	addr_range_descr_t* mem_map = (struct addr_range_descr_t*)(MEM_MAP_ADDR);
+	struct addr_range_descr_t* mem_map = (struct addr_range_descr_t*)(MEM_MAP_ADDR);
 	
 	uint32_t* current_ptr = (uint32_t*)(end_of_kernel - 4);
 	uint32_t current_page_addr = end_of_kernel;
@@ -99,3 +99,21 @@ uint32_t mem_free(uint32_t* page_addr)
 
 	return 0x0;
 }
+
+/*
+ * Create Page Directory, at given address
+ * @page_addr - Pointer to first address of page directory. Address must be 4096 bytes aligned
+ */
+void mem_pd_init(struct page_dir* page_addr)
+{
+	/* Check if address is aligned */
+	if (((uint32_t)(page_addr) & 0x1000)) {
+		kprintf("ADDRESS IS NOT ALIGNED TO PAGE BOUNDARY\n");
+		return;
+	}
+	
+	/* Create 1024 Page Directory entries, where Present flag = 0 */
+	for (int i = 0; i < 1024; i++)
+		page_addr->entries[i].present = 0x1;
+}
+
