@@ -14,5 +14,6 @@ void terminal_putchar(uint8_t );
 void terminal_printstring(char* data);
 void terminal_writedata(char* data, size_t size);
 void kprintf(char*, ...);
+void terminal_change_memory(uint32_t);
 
 #endif

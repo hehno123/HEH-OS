@@ -10,6 +10,11 @@ size_t terminal_column;
 uint8_t terminal_color;
 uint16_t* cell_address;
 
+void terminal_change_memory(uint32_t mem)
+{
+	cell_address = (uint16_t*)(mem);
+}
+
 void terminal_scroll()
 {
 	for(size_t i = 0; i < MAX_ROWS - 1; i++)

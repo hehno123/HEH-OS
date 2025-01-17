@@ -11,6 +11,22 @@
 #define PAGE_DIRECTORY_ENTRIES 1024
 #define PAGE_TABLE_ENTRIES 1024
 
+/* Define Page Flags */
+#define PAGE_RW 0b10
+#define PAGE_RO 0x0
+
+#define PAGE_SUP 0x0
+#define PAGE_USR 0b100
+
+#define PAGE_WB 0x0
+#define PAGE_WT 0b1000
+
+#define PAGE_CD 0x0
+#define PAGE_CE 0b10000
+
+#define PAGE_KB 0x0
+#define PAGE_MB 0b10000000
+
 struct addr_range_descr_t {
 	uint32_t base_addr_low;
 	uint32_t base_addr_high;
@@ -23,7 +39,7 @@ struct __attribute__((packed)) pd_entry {
     uint32_t present : 1;   /* Is Page present in physical memory */
     uint32_t r_w : 1;       /* Read-Only (0) or Read-Write (1) */
     uint32_t u_s : 1;       /* Supervisor mode (0) or User Mode (1) */
-    uint32_t w_t : 1;       /* Write back cache (0) or Write through (0) */
+    uint32_t w_t : 1;       /* Write back cache (0) or Write through (1) */
     uint32_t c_d : 1;       /* Cache disabled (0) or cache enabled (1) */
     uint32_t accessed : 1;  /* Set by processor to 1 if page was accessed */
     uint32_t res : 1;       /* Reserved by intel */
@@ -59,5 +75,9 @@ void mem_pmm_init(uint32_t);
 uint32_t mem_palloc(uint32_t*);
 uint32_t mem_free(uint32_t*);
 void mem_pd_init(struct page_dir*);
+void mem_pt_init(struct page_table*);
+void mem_make_pde(struct page_dir*, uint16_t, uint16_t, uint32_t);
+void mem_make_pte(struct page_table*, uint16_t, uint16_t, uint32_t);
+void mem_en_paging(struct page_dir*);
 
 #endif

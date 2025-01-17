@@ -24,8 +24,9 @@ void mem_pmm_init(uint32_t end_of_kernel)
 		uint64_t len_region = 
 			(uint64_t)(mem_map->length_high << 31) | mem_map->length_low;
 		
-		kprintf("%d, addr: 0x%l, len: 0x%l, type: 0x%l\n"
+		/*kprintf("%d, addr: 0x%l, len: 0x%l, type: 0x%l\n"
 				, i, base_addr, len_region, mem_map->type);
+		*/
 
 		/* Skip reserved regions (type == 2 indicates reserved) */
 		if (!(mem_map->type & 0x1)) {
@@ -42,8 +43,9 @@ void mem_pmm_init(uint32_t end_of_kernel)
 		/* Adjust the starting page */
 		current_page_addr = (is_first_alloc) ? base_addr : end_of_kernel;
 		
-		kprintf("Current_addr: 0x%l, Last_reg: 0x%l\n"
+		/*kprintf("Current_addr: 0x%l, Last_reg: 0x%l\n"
 				,(uint64_t)(current_page_addr), (uint64_t)(last_address_in_region));
+		*/
 
 		if (current_page_addr > last_address_in_region) {
 			mem_map++;
@@ -107,13 +109,90 @@ uint32_t mem_free(uint32_t* page_addr)
 void mem_pd_init(struct page_dir* page_addr)
 {
 	/* Check if address is aligned */
-	if (((uint32_t)(page_addr) & 0x1000)) {
+	if (((uint32_t)(page_addr) & 0xFFF)) {
 		kprintf("ADDRESS IS NOT ALIGNED TO PAGE BOUNDARY\n");
 		return;
 	}
 	
 	/* Create 1024 Page Directory entries, where Present flag = 0 */
 	for (int i = 0; i < 1024; i++)
-		page_addr->entries[i].present = 0x1;
+		page_addr->entries[i].present = 0x0;
+}
+
+/*
+ * Create Page Table at give address
+ * @page_addr - Pointer to first address of page table. Address must be 4096 bytes aligned
+ */
+void mem_pt_init(struct page_table* page_addr)
+{
+	if (((uint32_t)(page_addr) & 0xFFF)) {
+		kprintf("ADDRESS IS NOT ALIGNED TO PAGE BOUNDARY\n");
+		return;
+	}
+
+	/* Create 1024 Page Table entries, where Present flag = 0 */
+	for (int i = 0; i < 1024; i++)
+		page_addr->entries[i].present = 0x0;
+}
+
+/*
+ * Create Page Directory entry
+ * @page_addr - Pointer to first address of page directory.
+ * @index - Index of entry in page directory. Must be smaller than 1024
+ * @flags - Flags for page directory
+ * @phys_addr - Address of Page Table
+ */
+void mem_make_pde(struct page_dir* page_addr, uint16_t index, uint16_t flags, uint32_t phys_addr)
+{
+	if (index >= 1024) {
+		kprintf("INDEX OUT OF RANGE\n");
+		return;
+	}
+
+	page_addr->entries[index].present = 0x1;
+	page_addr->entries[index].r_w = (flags & 0b10) ? 1 : 0;
+	page_addr->entries[index].u_s = (flags & 0b100) ? 1 : 0;
+	page_addr->entries[index].w_t = (flags & 0b1000) ? 1 : 0;
+	page_addr->entries[index].c_d = (flags & 0b10000) ? 1 : 0;
+	page_addr->entries[index].ps = (flags & 0b10000000) ? 1 : 0;
+	page_addr->entries[index].global = (flags & 0b10000000) ? 1 : 0;
+	page_addr->entries[index].addr = phys_addr;
+}
+
+/*
+ * Create Page Table entry
+ * @page_addr - Pointer to first address of page table
+ * @index - Index of entry in page table. Must be smaller than 1024
+ * @flags - Flags for page table
+ * @phys_addr - Address of page frame
+ */
+void mem_make_pte(struct page_table* page_addr, uint16_t index, uint16_t flags, uint32_t phys_addr)
+{
+	if (index >= 1024) {
+		kprintf("INDEX OUT OF RANGE\n");
+		return;
+	}
+
+	page_addr->entries[index].present = 0x1;
+	page_addr->entries[index].r_w = (flags & 0b10) ? 1 : 0;
+	page_addr->entries[index].u_s = (flags & 0b100) ? 1 : 0;
+	page_addr->entries[index].w_t = (flags & 0b1000) ? 1 : 0;
+	page_addr->entries[index].c_d = (flags & 0b10000) ? 1 : 0;
+	page_addr->entries[index].pat = (flags & 0b10000000) ? 1 : 0;
+	page_addr->entries[index].global = (flags & 0b10000000) ? 1 : 0;
+	page_addr->entries[index].addr = phys_addr;
+}
+
+void mem_en_paging(struct page_dir* page_addr)
+{
+	uint32_t kernel_start = 0x110000;
+	uint16_t kernel_o = 0x08;
+
+	asm("movl %0, %%eax" :: "Nd"(page_addr) : "memory");
+	asm("movl %eax, %cr3");
+	asm("movl %cr0, %eax");
+	asm("orl $0x80000000, %eax");
+	asm("movl %eax, %cr0");
+	//asm("hlt");
 }
 
