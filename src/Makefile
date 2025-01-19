@@ -10,13 +10,13 @@ $(BUILD_DIR)/kernel.bin: $(BUILD_DIR)/entry.o ${C_OBJECTS}
 	i386-elf-gcc -o $@ -T linker.ld -ffreestanding -nostdlib $^ -lgcc
 
 $(BUILD_DIR)/kernel.elf: $(BUILD_DIR)/entry.o ${C_OBJECTS}
-	i386-elf-gcc -ffreestanding -nostdlib -g -o $@ -Ttext 0x10000 $^ -lgcc
+	i386-elf-gcc -O0 -ffreestanding -nostdlib -g -o $@ -Ttext 0x10000 $^ -lgcc
 
 $(BUILD_DIR)/os-img.bin: $(BUILD_DIR)/boot.bin $(BUILD_DIR)/kernel.bin $(BUILD_DIR)/zeroes.bin
 	cat $^ > $@
 
 run_system: $(BUILD_DIR)/os-img.bin
-	qemu-system-i386 -m 4G -hda $< -s -S -monitor stdio
+	qemu-system-i386 -m 4G -vga std -hda $< -s -S -monitor stdio
 
 $(BUILD_DIR)/%.bin: %.asm
 	nasm $< -g -f bin -o $@

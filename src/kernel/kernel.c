@@ -9,6 +9,7 @@
 #include "mem.h"
 
 extern uint32_t _end;
+#define VIRT_BASE 0xC0000000
 
 void kernel_main(void) 
 {
@@ -16,28 +17,35 @@ void kernel_main(void)
 	//terminal_init();
 	//kprintf("HEJ TO JA");
 	
-	void (*mem_pmm_init_ptr)(uint32_t) = (&mem_pmm_init - 0x100000);
-	uint32_t (*mem_palloc_ptr)(uint32_t*) = (&mem_palloc - 0x100000);
-	void (*mem_pd_init_ptr)(struct page_dir*) = (&mem_pd_init - 0x100000);
-	void (*mem_pt_init_ptr)(struct page_table*) = (&mem_pt_init - 0x100000);
-	void (*mem_make_pde_ptr)(struct page_dir*, uint16_t, uint16_t, uint32_t) = (&mem_make_pde - 0x100000);
-	void (*mem_make_pte_ptr)(struct page_table*, uint16_t, uint16_t, uint32_t) = (&mem_make_pte - 0x100000);
-	void (*mem_en_paging_ptr)(struct page_dir*) = (&mem_en_paging - 0x100000);
-
-	struct page_dir* kernel_page_dir = (struct page_dir*)(mem_palloc_ptr((uint32_t*)(&_end - 0x40000 - 1)));
-		struct page_table* kernel_page_table = (struct page_table*)(mem_palloc_ptr((uint32_t*)(&_end - 0x40000 - 1)));
+	void (*mem_pmm_init_ptr)(uint32_t) = (&mem_pmm_init - VIRT_BASE);
+	uint32_t (*mem_palloc_ptr)(uint32_t*) = (&mem_palloc - VIRT_BASE);
+	void (*mem_pd_init_ptr)(struct page_dir*) = (&mem_pd_init - VIRT_BASE);
+	void (*mem_pt_init_ptr)(struct page_table*) = (&mem_pt_init - VIRT_BASE);
+	void (*mem_make_pde_ptr)(struct page_dir*, uint16_t, uint16_t, uint32_t) = (&mem_make_pde - VIRT_BASE);
+	void (*mem_make_pte_ptr)(struct page_table*, uint16_t, uint16_t, uint32_t) = (&mem_make_pte - VIRT_BASE);
+	void (*mem_en_paging_ptr)(struct page_dir*) = (&mem_en_paging - VIRT_BASE);
 	
-	mem_pmm_init_ptr((uint32_t)(&_end - 0x100000 - 1));
-	mem_pd_init_ptr(kernel_page_dir);
-	mem_pt_init_ptr(kernel_page_table);
-
-	mem_make_pde_ptr(kernel_page_dir, 0x0, PAGE_RW, (uint32_t)((uint32_t)(kernel_page_table) >> 12));
+	mem_pmm_init_ptr((uint32_t)(&_end) - VIRT_BASE);
+	struct page_dir* kernel_page_dir = (struct page_dir*)(mem_palloc_ptr((uint32_t*)(&_end - (VIRT_BASE / 4) - 1)));
+	struct page_table* kernel_page_table = (struct page_table*)(mem_palloc_ptr((uint32_t*)(&_end - (VIRT_BASE / 4) - 1)));
+	struct page_table* identity_page_table = (struct page_table*)(mem_palloc_ptr((uint32_t*)(&_end - (VIRT_BASE / 4) - 1)));
 	
-	for (int i = 0; i < 1024; i++)
-		mem_make_pte_ptr(kernel_page_table, i, PAGE_RW, (uint32_t)((uint32_t)((MEM_PAGE_SIZE * i) >> 12)));
+	mem_pd_init_ptr((uint32_t)(kernel_page_dir));
+	mem_pt_init_ptr((uint32_t)(kernel_page_table));
+	mem_pt_init_ptr((uint32_t)(identity_page_table));
 
-	mem_en_paging(kernel_page_dir);
+	mem_make_pde_ptr(kernel_page_dir, VIRT_BASE >> 22, PAGE_RW, (uint32_t)((uint32_t)(kernel_page_table) >> 12));
+	mem_make_pde_ptr(kernel_page_dir, 0x0, PAGE_RW, (uint32_t)((uint32_t)(identity_page_table) >> 12));
 
+	for (int i = 0; i < 1024; i++) {
+		mem_make_pte_ptr(kernel_page_table, i, PAGE_RW, (uint32_t)((uint32_t)(VIRT_BASE + (MEM_PAGE_SIZE * i) >> 12)));
+		mem_make_pte_ptr(identity_page_table, i, PAGE_RW, (uint32_t)((uint32_t)(MEM_PAGE_SIZE * i) >> 12));
+	}
+
+	mem_en_paging_ptr((uint32_t)(kernel_page_dir));
+	terminal_init();
+	kprintf("HEJ TO JA");
+	
 	/* initalize PMM manager */
 	/*mem_pmm_init((uint32_t)(&_end));
 	struct page_dir* kernel_page_dir = (struct page_dir*)(mem_palloc((uint32_t*)(&_end - 1)));

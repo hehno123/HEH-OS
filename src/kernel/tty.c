@@ -46,9 +46,9 @@ void terminal_clear()
 void terminal_init()
 {
 	terminal_row = 0;
-	terminal_column = 0;
+	terminal_column = 123;
 	terminal_color = change_cell_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
-	cell_address = (uint16_t*)(VGA_ADDRESS);
+	cell_address = (uint16_t*)(0xc00b8000);
 	vga_enable_cursor(0,0);
 	terminal_clear();
 }

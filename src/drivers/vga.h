@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define VGA_ADDRESS 0xb8000
+#define VGA_ADDRESS 0x1b8000
 #define MAX_ROWS 25
 #define MAX_COL 80
 
