@@ -38,7 +38,7 @@ void kernel_main(void)
 	mem_make_pde_ptr(kernel_page_dir, 0x0, PAGE_RW, (uint32_t)((uint32_t)(identity_page_table) >> 12));
 
 	for (int i = 0; i < 1024; i++) {
-		mem_make_pte_ptr(kernel_page_table, i, PAGE_RW, (uint32_t)((uint32_t)(VIRT_BASE + (MEM_PAGE_SIZE * i) >> 12)));
+		mem_make_pte_ptr(kernel_page_table, i, PAGE_RW, (uint32_t)((uint32_t)((MEM_PAGE_SIZE * i) >> 12)));
 		mem_make_pte_ptr(identity_page_table, i, PAGE_RW, (uint32_t)((uint32_t)(MEM_PAGE_SIZE * i) >> 12));
 	}
 

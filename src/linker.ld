@@ -8,22 +8,23 @@ SECTIONS {
     . = 0xC0010000;
 
     /* Text section (code) */
-    .text : AT(ADDR(.text) - 0xC0000000) {
-        _start = .;            /* Mark the start of the kernel */
+    .text ALIGN(4K) : AT(ADDR(.text) - 0xC0000000) {
         *(.text)               /* Place all .text sections here */
     }
-
+    
+    .rodata ALIGN (4K) : AT (ADDR (.rodata) - 0xC0000000) {
+	    *(.rodata)
+    }
+		
     /* Data section (initialized data) */
-    .data : AT(ADDR(.data) - 0xC0000000) {
-        _data = .;             /* Mark the start of the .data section */
+    .data ALIGN(4K) : AT(ADDR(.data) - 0xC0000000) {
         *(.data)               /* Place all .data sections here */
     }
 
     /* BSS section (uninitialized data) */
-    .bss : AT(ADDR(.bss) - 0xC0000000) {
-        _bss_start = .;        /* Mark the start of the .bss section */
-        *(.bss)                /* Place all .bss sections here */
-        _bss_end = .;          
+    .bss ALIGN(4K) : AT(ADDR(.bss) - 0xC0000000) {
+        *(COMMON)        /* Mark the start of the .bss section */
+        *(.bss)                /* Place all .bss sections here */        
     }
     
     . = ALIGN(0x1000);
