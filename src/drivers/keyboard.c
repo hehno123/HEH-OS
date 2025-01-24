@@ -33,6 +33,6 @@ void keyboard_init()
     	while(inb(KEY_STAT_PORT) & 0x02);
     	outb(config_byte, KEY_DATA_PORT);
 	
-    	outb(0xAE, KEY_COMM_POR); 
+    	outb(0xAE, KEY_COMM_PORT); 
 }
 
