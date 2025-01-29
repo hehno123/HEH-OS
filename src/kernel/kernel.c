@@ -46,7 +46,7 @@ void kernel_main(void)
 	mem_en_paging_ptr((uint32_t)(kernel_page_dir));
 	terminal_init();
 	
-	kprintf("YOU HAVE THIS VAL %X", fdc_get_driver());
+	//kprintf("YOU HAVE THIS VAL %X", fdc_get_driver());
 
 	/* initalize PMM manager */
 	/*mem_pmm_init((uint32_t)(&_end));
