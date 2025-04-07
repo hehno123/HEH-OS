@@ -14,6 +14,7 @@ $(BUILD_DIR)/kernel.elf: $(BUILD_DIR)/entry.o ${C_OBJECTS}
 
 $(BUILD_DIR)/os-img.bin: $(BUILD_DIR)/boot.bin $(BUILD_DIR)/kernel.bin $(BUILD_DIR)/zeroes.bin
 	cat $^ > $@
+	dd if=siema.txt of=$@ bs=512 seek=30 conv=notrunc
 
 run_system: $(BUILD_DIR)/os-img.bin
 	qemu-system-i386 -m 4G -vga std -hda $< -s -S -monitor stdio

@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+void read_ata(uint32_t, uint8_t, uint16_t*);
+
 static inline uint8_t inb(uint32_t port)
 {
 	uint8_t res;
@@ -15,7 +17,7 @@ static inline uint16_t inw(uint32_t port)
 {
 	uint16_t res;
 
-	__asm__ volatile("inw %w1, %b0" : "=a"(res) : "Nd"(port) : "memory");
+	__asm__ volatile("inw %1, %0" : "=a"(res) : "Nd"(port) : "memory");
 	return res;
 }
 

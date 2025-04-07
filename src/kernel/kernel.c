@@ -7,7 +7,6 @@
 #include "../drivers/vga.h"
 #include "../drivers/ports.h"
 #include "mem.h"
-#include "../drivers/fdc.h"
 
 extern uint32_t _end;
 #define VIRT_BASE 0xC0000000
@@ -45,7 +44,8 @@ void kernel_main(void)
 
 	mem_en_paging_ptr((uint32_t)(kernel_page_dir));
 	terminal_init();
-	
+
+	read_ata(30, 1, 0x000000);	
 	//kprintf("YOU HAVE THIS VAL %X", fdc_get_driver());
 
 	/* initalize PMM manager */
