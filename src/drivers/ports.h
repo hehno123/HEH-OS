@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 void read_ata(uint32_t, uint8_t, uint16_t*);
+void write_ata(uint32_t, uint8_t, uint16_t*);
 
 static inline uint8_t inb(uint32_t port)
 {
@@ -36,7 +37,7 @@ static inline uint8_t outb(uint8_t val, uint32_t port)
 
 static inline uint16_t outw(uint16_t val, uint32_t port)
 {
-	__asm__ volatile("outw %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
+	__asm__ volatile("outw %0, %1" : : "a"(val), "Nd"(port) : "memory");
 }
 
 static inline uint32_t outl(uint32_t val, uint32_t port)

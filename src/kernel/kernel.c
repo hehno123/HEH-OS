@@ -44,8 +44,19 @@ void kernel_main(void)
 
 	mem_en_paging_ptr((uint32_t)(kernel_page_dir));
 	terminal_init();
+	
+	uint8_t ok[512];
+	ok[0] = 'h';
+	ok[1] = 'e';
+	ok[2] = 'j';
+	ok[3] = ' ';
+	ok[4] = 'p';
+	ok[5] = 'u';
 
-	read_ata(30, 1, 0x000000);	
+	write_ata(30, 1, (uint16_t*)(ok));
+	read_ata(30, 1, 0x00000000);
+
+	//read_ata(30, 1, 0x000000);	
 	//kprintf("YOU HAVE THIS VAL %X", fdc_get_driver());
 
 	/* initalize PMM manager */

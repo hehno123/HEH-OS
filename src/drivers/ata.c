@@ -50,6 +50,29 @@ void read_ata(uint32_t lba_address, uint8_t count, uint16_t* buffer)
 	}
 }
 
-			
-		
+void write_ata(uint32_t lba_address, uint8_t count, uint16_t* buffer)
+{
+	outb(0xE0 | ((lba_address >> 24) & 0x0F), ATA_PORT_IO_6);
+	outb(0x00, ATA_PORT_IO_1);
+	outb(count, ATA_PORT_IO_2);
+	outb((uint8_t)(lba_address), ATA_PORT_IO_3);
+	outb((uint8_t)(lba_address >> 8), ATA_PORT_IO_4);
+	outb((uint8_t)(lba_address >> 16), ATA_PORT_IO_5);
+	outb(0x30, ATA_PORT_IO_7);
+
+	for(int i = 0; i < count; i++) {
+		polling();
+
+		for(int j = 0; j < 256; j++) {
+			outw(*buffer, ATA_PORT_IO_0);
+			buffer++;
+			__asm__ __volatile__("jmp 1f\n\t"
+                     			     "1: jmp 2f\n\t"
+                     			     "2:");
+		}
+	}
+
+	outb(0xE7, ATA_PORT_IO_7);
+}
+	
 
