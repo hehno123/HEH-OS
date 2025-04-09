@@ -12,11 +12,7 @@ extern uint32_t _end;
 #define VIRT_BASE 0xC0000000
 
 void kernel_main(void) 
-{
-	/* Initialize terminal interface */
-	//terminal_init();
-	//kprintf("HEJ TO JA");
-	
+{	
 	void (*mem_pmm_init_ptr)(uint32_t) = (&mem_pmm_init - VIRT_BASE);
 	uint32_t (*mem_palloc_ptr)(uint32_t*) = (&mem_palloc - VIRT_BASE);
 	void (*mem_pd_init_ptr)(struct page_dir*) = (&mem_pd_init - VIRT_BASE);
@@ -45,17 +41,18 @@ void kernel_main(void)
 	mem_en_paging_ptr((uint32_t)(kernel_page_dir));
 	terminal_init();
 	
-	uint8_t ok[512];
-	ok[0] = 'h';
+	heap_init(_end);
+
+	//uint8_t ok[512];
+	/*ok[0] = 'h';
 	ok[1] = 'e';
 	ok[2] = 'j';
 	ok[3] = ' ';
 	ok[4] = 'p';
 	ok[5] = 'u';
-
-	write_ata(30, 1, (uint16_t*)(ok));
-	read_ata(30, 1, 0x00000000);
-
+	*/
+	//write_ata(31, 1, (uint16_t*)(ok));
+	//read_ata(31, 1, 0x00000000);
 	//read_ata(30, 1, 0x000000);	
 	//kprintf("YOU HAVE THIS VAL %X", fdc_get_driver());
 

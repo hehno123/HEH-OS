@@ -2,6 +2,8 @@
 #include "tty.h"
 
 uint32_t* mem_end_ptr = 0;
+uint32_t heap_beginning;
+uint32_t free_list_ptr;
 
 /*
  * Initialize physical memory manager
@@ -196,3 +198,48 @@ void mem_en_paging(struct page_dir* page_addr)
 	//asm("hlt");
 }
 
+void heap_init(uint32_t _end)
+{
+	struct block_header* heap_start = (struct block_header*)(mem_palloc((uint32_t*)(&_end - 1)));
+	heap_start.block_size = HEAP_LIMIT - (uint32_t)(block_header) - 2;
+	heap_start.present = 0x0;
+	heap_start.next_block = 0x0;
+	
+	heap_beginning = (uint32_t)(heap_start);
+	free_list_ptr = heap_beginning;
+}
+
+uint32_t* kmalloc(uint32_t block_size)
+{
+	struct block_header* list_start = (struct block_header*)(free_list_ptr);
+	
+	if(list_start.next_block == 0x0 && heap_start.block_size < block_size) {
+		kprintf("DON'T HAVE MEMORY");
+		return 0;
+	}
+
+	while(list_start != 0x0)
+	{
+		if(list_start.block_size > block_size + 2) {
+			struct block_header* next = (struct block_header*)(&list_start + block_size + 2);
+			next.present = 0x0;
+			next.next_block = list_start.next_block;
+			next.block_size = list_start.block_size - block_size - 2;
+			list_start.block_size = block_size;
+			list_start.present = 0x1;
+			free_list_ptr = (uint32_t)(next);
+			return (uint32_t*)(list_start);
+		}
+		
+		list_start = list_start.next_block;
+	}
+
+	return 0x0;
+}
+
+void kfree(uint32_t* ptr)
+{
+	struct block_header* header = (struct block_header*)(ptr);
+	struct block_header* list_start = (struct block_header*)(free_list_ptr);
+
+	while(list_start)

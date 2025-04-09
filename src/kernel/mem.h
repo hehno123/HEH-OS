@@ -27,6 +27,8 @@
 #define PAGE_KB 0x0
 #define PAGE_MB 0b10000000
 
+#define HEAP_LIMIT 0x800000
+
 struct addr_range_descr_t {
 	uint32_t base_addr_low;
 	uint32_t base_addr_high;
@@ -69,6 +71,12 @@ struct page_dir {
 
 struct page_table {
 	struct pt_entry entries[PAGE_TABLE_ENTRIES];
+};
+
+struct __attribute__((packed)) block_header {
+	uint32_t block_size : 29;
+	uint32_t present : 3;
+	uint32_t next_block;
 };
 
 void mem_pmm_init(uint32_t);

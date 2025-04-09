@@ -101,11 +101,6 @@ reload:
 	mov gs, ax
 	mov ss, ax
 	
-	;enable the A20 line
-	;in al, 0x92
-	;or al, 0x02
-	;out 0x92, al
-	
 	mov ebp, 0x90000
 	mov esp, ebp
 
@@ -156,13 +151,7 @@ gdt_start:
     dd 0x0 
     dd 0x0
 
-gdt_code: 
- ;   dw 0xffff    
-  ;  dw 0x0      
-  ;  db 0x0       
-  ;  db 10011010b 
-  ;  db 11001111b 
-  ;  db 0x0 
+gdt_code:  
      	dw 0xFFFF ;16 bits limit
      	dw 0x0 ;base - 16 bits
 	db 0x0
