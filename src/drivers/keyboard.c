@@ -4,6 +4,8 @@
  * Initalize PS/2 controller
  */
 
+char keyboard_buffer[256];
+
 void keyboard_init()
 {
     	/* Disable devices connected to PS/2 */
@@ -35,4 +37,3 @@ void keyboard_init()
 	
     	outb(0xAE, KEY_COMM_PORT); 
 }
-

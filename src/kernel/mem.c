@@ -2,8 +2,7 @@
 #include "tty.h"
 
 uint32_t* mem_end_ptr = 0;
-uint32_t heap_beginning;
-uint32_t free_list_ptr;
+struct block_header* heap_start;
 
 /*
  * Initialize physical memory manager
@@ -198,40 +197,43 @@ void mem_en_paging(struct page_dir* page_addr)
 	//asm("hlt");
 }
 
-void heap_init(uint32_t _end)
+void heap_init(uint32_t* ptr)
 {
-	struct block_header* heap_start = (struct block_header*)(mem_palloc((uint32_t*)(&_end - 1)));
-	heap_start.block_size = HEAP_LIMIT - (uint32_t)(block_header) - 2;
-	heap_start.present = 0x0;
-	heap_start.next_block = 0x0;
-	
-	heap_beginning = (uint32_t)(heap_start);
-	free_list_ptr = heap_beginning;
+	heap_start = (struct block_header*)(ptr);
+	heap_start->block_size = 0x0;
+	heap_start->present = 0x0;
+	heap_start->next_block = (struct block_header*)((uint32_t)(heap_start + 2));
+	heap_start->next_block->block_size = (uint32_t)(HEAP_LIMIT - (uint32_t)(heap_start) - 4);
+	heap_start->next_block->next_block = 0x0;
+	heap_start->next_block->present = 0x0;
 }
 
 uint32_t* kmalloc(uint32_t block_size)
 {
-	struct block_header* list_start = (struct block_header*)(free_list_ptr);
+	struct block_header* list_start = heap_start->next_block;
 	
-	if(list_start.next_block == 0x0 && heap_start.block_size < block_size) {
-		kprintf("DON'T HAVE MEMORY");
+	if(list_start->next_block == 0x0 && list_start->block_size < block_size) {
+		kprintf("SIGMA");
 		return 0;
 	}
 
 	while(list_start != 0x0)
 	{
-		if(list_start.block_size > block_size + 2) {
-			struct block_header* next = (struct block_header*)(&list_start + block_size + 2);
-			next.present = 0x0;
-			next.next_block = list_start.next_block;
-			next.block_size = list_start.block_size - block_size - 2;
-			list_start.block_size = block_size;
-			list_start.present = 0x1;
-			free_list_ptr = (uint32_t)(next);
+		if(list_start->block_size > block_size + 2) {
+			struct block_header* next = (struct block_header*)((uint32_t)list_start + block_size + 2);
+			next->present = 0x0;
+			next->next_block = list_start->next_block;
+			next->block_size = list_start->block_size - block_size - 2;
+			list_start->block_size = block_size;
+			list_start->present = 0x1;
+
+			if(heap_start->next_block == list_start)
+				heap_start->next_block = next;
+			
 			return (uint32_t*)(list_start);
 		}
-		
-		list_start = list_start.next_block;
+
+		list_start = list_start->next_block;
 	}
 
 	return 0x0;
@@ -240,6 +242,35 @@ uint32_t* kmalloc(uint32_t block_size)
 void kfree(uint32_t* ptr)
 {
 	struct block_header* header = (struct block_header*)(ptr);
-	struct block_header* list_start = (struct block_header*)(free_list_ptr);
+	struct block_header* list_start = (struct block_header*)(heap_start->next_block);
+	struct block_header* prev_block = heap_start;
+	
+	while(list_start != NULL) {
+		if (header < list_start) {
+			prev_block->next_block = header;
+			header->next_block = list_start;
+			header->present = 0x0;
+			
+			kprintf("POINTER: %X\n", heap_start->next_block); 	
+			if((uint32_t)(header) + header->block_size + 2 == (uint32_t)(header->next_block)) {
+				header->block_size += header->next_block->block_size + 2;
+				header->next_block = header->next_block->next_block;
+			}
+			
+			if(heap_start == prev_block) {
+				break;
+			}
 
-	while(list_start)
+			if((uint32_t)(prev_block) + prev_block->block_size + 2 == (uint32_t)(header)) {
+				prev_block->block_size += header->block_size + 2;
+			        prev_block->next_block = header->next_block;
+			}
+				
+			break;
+		}
+		
+		prev_block = prev_block->next_block;
+		list_start = list_start->next_block;
+	}
+}
+

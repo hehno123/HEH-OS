@@ -41,46 +41,17 @@ void kernel_main(void)
 	mem_en_paging_ptr((uint32_t)(kernel_page_dir));
 	terminal_init();
 	
-	heap_init(_end);
-
-	//uint8_t ok[512];
-	/*ok[0] = 'h';
-	ok[1] = 'e';
-	ok[2] = 'j';
-	ok[3] = ' ';
-	ok[4] = 'p';
-	ok[5] = 'u';
-	*/
-	//write_ata(31, 1, (uint16_t*)(ok));
-	//read_ata(31, 1, 0x00000000);
-	//read_ata(30, 1, 0x000000);	
-	//kprintf("YOU HAVE THIS VAL %X", fdc_get_driver());
-
-	/* initalize PMM manager */
-	/*mem_pmm_init((uint32_t)(&_end));
-	struct page_dir* kernel_page_dir = (struct page_dir*)(mem_palloc((uint32_t*)(&_end - 1)));
-	struct page_table* kernel_page_table = (struct page_table*)(mem_palloc((uint32_t*)(&_end - 1)));
-	mem_pd_init(kernel_page_dir);
-	mem_pt_init(kernel_page_table);
-	*/
-
-	/* Initalize Page Directory and Page table entries */
-	/* uint16_t flags = PAGE_RW;
-	mem_make_pde(kernel_page_dir, 0x0, flags, (uint32_t)((uint32_t)(kernel_page_table) >> 12));
-	flags = 0x0;	
-	flags = PAGE_RW;
-
-	for (int i = 0; i < 1024; i++)
-		mem_make_pte(kernel_page_table, i, flags, ((uint32_t)((MEM_PAGE_SIZE * i) >> 12)));
-		
-	mem_en_paging(kernel_page_dir);
-	terminal_change_memory(0x1b8000);
+	heap_init((uint32_t*)(mem_palloc((uint32_t*)(&_end - 1))));
+	uint32_t* ok = kmalloc(10);
+	uint32_t* ok2 = kmalloc(5);
+	kfree(ok);
+	kfree(ok2);
 
 	keyboard_init();
 	remap_pic(0x20, 0x28);
 	install_idt();
-	kprintf("ASDFASDFASDF");
+	kprintf("SYSTEM LOADED\n");
 
-	__asm__ volatile("sti");*/
+	__asm__ volatile("sti");
 }
 

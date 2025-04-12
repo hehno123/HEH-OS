@@ -76,7 +76,7 @@ struct page_table {
 struct __attribute__((packed)) block_header {
 	uint32_t block_size : 29;
 	uint32_t present : 3;
-	uint32_t next_block;
+	struct block_header* next_block;
 };
 
 void mem_pmm_init(uint32_t);
@@ -87,5 +87,9 @@ void mem_pt_init(struct page_table*);
 void mem_make_pde(struct page_dir*, uint16_t, uint16_t, uint32_t);
 void mem_make_pte(struct page_table*, uint16_t, uint16_t, uint32_t);
 void mem_en_paging(struct page_dir*);
+
+void kfree(uint32_t *);
+uint32_t* kmalloc(uint32_t);
+void heap_init(uint32_t*);
 
 #endif
