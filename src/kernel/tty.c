@@ -142,8 +142,17 @@ void kprintf(char* format, ...)
 			format++;
 			char buf[30];
 			char is_num_format = 0;
-
-			if(*format == 'd' || *format == 'i')
+			
+			if(*format == 'c')
+			{
+				int32_t temp= va_arg(args, int32_t);
+				uint8_t val = (uint8_t)(temp);
+				buf[0] = val;
+				buf[1] = '\0';
+				is_num_format = 1;
+			}
+			
+			else if(*format == 'd' || *format == 'i')
 			{
 				int32_t value = va_arg(args, int32_t);
 				format_str((int64_t)(value), 10, 1, buf);

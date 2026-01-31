@@ -52,9 +52,7 @@ void isr_handler(register_t registers)
 				io_wait();
 				uint8_t oki = inb(0x60);
 				io_wait();
-				
-				if(oki == 0x04)
-					terminal_printstring("3");
+				kprintf("%c\n", code_to_ascii(oki - 1));
 			}
 		}
 
@@ -67,3 +65,4 @@ void isr_handler(register_t registers)
 	}
 	
 }
+

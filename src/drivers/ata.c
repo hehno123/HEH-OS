@@ -36,17 +36,11 @@ void read_ata(uint32_t lba_address, uint8_t count, uint16_t* buffer)
 	
 	for(int i = 0; i < count; i++) {
 		polling();
-		
-		char ok[513];
-		ok[512] = '\0';
-		
 		for(int j = 0; j < 256; j++) {
 			uint16_t data = inw(0x1F0);
-			ok[j * 2] = (char)(data);
-			ok[(j * 2) + 1] = (char)(data >> 8);
+			*buffer = data;
+			buffer++;
 		}
-
-		terminal_printstring(ok);
 	}
 }
 

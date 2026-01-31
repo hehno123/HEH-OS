@@ -3,26 +3,48 @@ all: run_system
 
 C_OBJECTS = $(shell find $(BUILD_DIR) -name '*.o')
 
-$(BUILD_DIR)/entry.o: entry.asm
-	nasm -g -f elf $< -o $@
+$(BUILD_DIR)/entry.o: kernel/boot.s
+	i386-elf-as $< -o $@
 
-$(BUILD_DIR)/kernel.bin: $(BUILD_DIR)/entry.o ${C_OBJECTS}
-	i386-elf-gcc -o $@ -T linker.ld -ffreestanding -nostdlib $^ -lgcc
+$(BUILD_DIR)/kernel.o: $(BUILD_DIR)/entry.o ${C_OBJECTS}
+	i386-elf-gcc -T linker.ld -o $@ -ffreestanding -O2 -nostdlib $^ -lgcc
 
-$(BUILD_DIR)/kernel.elf: $(BUILD_DIR)/entry.o ${C_OBJECTS}
-	i386-elf-gcc -O0 -ffreestanding -nostdlib -g -o $@ -Ttext 0x10000 $^ -lgcc
+$(BUILD_DIR)/disk.img: $(BUILD_DIR)/kernel.o
+	dd if=/dev/zero of=$@ bs=512 count=131072
+	parted -s $@ mklabel msdos
+	parted -s $@ mkpart primary 1MiB 100%
+	parted -s $@ set 1 boot on
+	sudo losetup /dev/loop0 $@
+	sudo losetup /dev/loop1 $@ -o 1048576
+	sudo mke2fs -E revision=0 /dev/loop1
+	sudo mount /dev/loop1 /mnt
+	sudo mkdir -p /mnt/boot/grub
+	sudo cp $^ /mnt/boot 
+	echo 'set debug=all' > grub.cfg
+	echo 'menuentry "myos" {' > grub.cfg
+	echo '  multiboot /boot/kernel.o' >> grub.cfg
+	echo '}' >> grub.cfg
+	sudo cp grub.cfg /mnt/boot/grub/grub.cfg
+	sudo cp siema.txt /mnt/siema.txt
+	rm grub.cfg
+	sudo grub-install --target=i386-pc --root-directory=/mnt --no-floppy --modules="normal part_msdos ext2 multiboot" /dev/loop0
+	sync
+	sudo umount /mnt
+	sudo losetup -d /dev/loop0
+	sudo losetup -d /dev/loop1
 
-$(BUILD_DIR)/os-img.bin: $(BUILD_DIR)/boot.bin $(BUILD_DIR)/kernel.bin $(BUILD_DIR)/zeroes.bin
-	cat $^ > $@
-	dd if=siema.txt of=$@ bs=512 seek=30 conv=notrunc
-
-run_system: $(BUILD_DIR)/os-img.bin
-	qemu-system-i386 -m 4G -vga std -hda $< -s -S -monitor stdio
+run_system: $(BUILD_DIR)/disk.img
+	qemu-system-i386 -m 4G -vga std -hda $< -s -S -monitor stdio -d int,in_asm
 
 $(BUILD_DIR)/%.bin: %.asm
 	nasm $< -g -f bin -o $@
 
 clean:
 	rm -rf $(BUILD_DIR)/*
+	make -C drivers
+	make -C kernel
+	make -C cpu
+	make -C libc/string
+
 
 

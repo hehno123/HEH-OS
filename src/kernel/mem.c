@@ -1,5 +1,6 @@
 #include "mem.h"
 #include "tty.h"
+#include "multiboot.h"
 
 uint32_t* mem_end_ptr = 0;
 struct block_header* heap_start;
@@ -9,30 +10,31 @@ struct block_header* heap_start;
  * @end_of_kernel: Address marking the end of the kernel in memory. This address should be page aligned
  */
 
-void mem_pmm_init(uint32_t end_of_kernel)
+void mem_pmm_init(uint32_t end_of_kernel, uint32_t header_addr)
 {
-	int* ptr = (short*)(MEM_MAP_LEN_ADDR);
-	int len = *ptr;
-	struct addr_range_descr_t* mem_map = (struct addr_range_descr_t*)(MEM_MAP_ADDR);
-	
+	struct multiboot_info* head = (struct multiboot_info*)(header_addr);
+	int len = head->mmap_length;
+
 	uint32_t* current_ptr = (uint32_t*)(end_of_kernel - 4);
 	uint32_t current_page_addr = end_of_kernel;
 	uint8_t is_first_alloc = 0;
 	
-	for (int i = 0; i < len; i++) {
+	kprintf("%d\n", head->flags);
+
+	for (int i = 0; i < len; i += sizeof(struct addr_range_descr_t)) {
+		struct addr_range_descr_t* mem_map = (struct addr_range_descr_t*)(head->mmap_addr + i);
+
 		uint64_t base_addr =
 			(uint64_t)(mem_map->base_addr_high << 31) | mem_map->base_addr_low;
 		uint64_t len_region = 
 			(uint64_t)(mem_map->length_high << 31) | mem_map->length_low;
 		
 		/*kprintf("%d, addr: 0x%l, len: 0x%l, type: 0x%l\n"
-				, i, base_addr, len_region, mem_map->type);
-		*/
+				, i, base_addr, len_region, mem_map->type); */
 
 		/* Skip reserved regions (type == 2 indicates reserved) */
 		if (!(mem_map->type & 0x1)) {
 			is_first_alloc = 1;
-			mem_map++;
 			continue;
 		}
 
@@ -45,11 +47,9 @@ void mem_pmm_init(uint32_t end_of_kernel)
 		current_page_addr = (is_first_alloc) ? base_addr : end_of_kernel;
 		
 		/*kprintf("Current_addr: 0x%l, Last_reg: 0x%l\n"
-				,(uint64_t)(current_page_addr), (uint64_t)(last_address_in_region));
-		*/
+				,(uint64_t)(current_page_addr), (uint64_t)(last_address_in_region));*/
 
 		if (current_page_addr > last_address_in_region) {
-			mem_map++;
 			is_first_alloc = 1;
 			continue;
 		}
@@ -67,7 +67,6 @@ void mem_pmm_init(uint32_t end_of_kernel)
 		}
 		
 		is_first_alloc = 1;
-		mem_map++;
 	}
 
 	*current_ptr = 0x0;

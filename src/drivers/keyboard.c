@@ -1,4 +1,5 @@
 #include "keyboard.h"
+#include "../kernel/tty.h"
 
 /*
  * Initalize PS/2 controller
@@ -37,3 +38,17 @@ void keyboard_init()
 	
     	outb(0xAE, KEY_COMM_PORT); 
 }
+
+uint8_t code_to_ascii(uint8_t code)
+{
+	if (code == 0x39) {
+		return 32;
+	}
+	
+	if (code >= 0x81) {
+		return 0;
+	}
+
+	return kbd_US[code];
+}
+

@@ -236,7 +236,6 @@ isr32:
     pushl $32 
     jmp isr_wrapper
 isr33:
-    cli  
     pushl $1 
     pushl $33 
     jmp isr_wrapper

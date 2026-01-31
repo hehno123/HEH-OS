@@ -30,6 +30,7 @@
 #define HEAP_LIMIT 0x800000
 
 struct addr_range_descr_t {
+	uint32_t size;
 	uint32_t base_addr_low;
 	uint32_t base_addr_high;
 	uint32_t length_low;
@@ -79,7 +80,7 @@ struct __attribute__((packed)) block_header {
 	struct block_header* next_block;
 };
 
-void mem_pmm_init(uint32_t);
+void mem_pmm_init(uint32_t, uint32_t);
 uint32_t mem_palloc(uint32_t*);
 uint32_t mem_free(uint32_t*);
 void mem_pd_init(struct page_dir*);
