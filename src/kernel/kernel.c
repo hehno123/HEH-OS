@@ -6,6 +6,7 @@
 #include "tty.h"
 #include "../drivers/vga.h"
 #include "../drivers/ports.h"
+#include "../drivers/keyboard.h"
 #include "mem.h"
 #include "../fs/fs.h"
 
@@ -62,6 +63,11 @@ void kernel_main(uint32_t multiboot_struct)
 	__asm__ volatile("sti");
 	__asm__ volatile("int $0");
 	
-	while(1);	
+	kprintf("%c", 32);
+
+	while(1) {
+		kprintf("%c", read_keyboard());
+	}
+			
 }
 

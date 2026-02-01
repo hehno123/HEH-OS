@@ -5,7 +5,11 @@
  * Initalize PS/2 controller
  */
 
-char keyboard_buffer[256];
+//char keyboard_buffer[256];
+
+int kbd_wrt_ptr = 0;
+int kbd_rd_ptr = 0;
+uint8_t keyboard_buffer[256];
 
 void keyboard_init()
 {
@@ -41,7 +45,8 @@ void keyboard_init()
 
 uint8_t code_to_ascii(uint8_t code)
 {
-	if (code == 0x39) {
+	if (code == 57) {
+		kprintf("SPACJA WYKRYTA!!!!\n");
 		return 32;
 	}
 	
@@ -51,4 +56,20 @@ uint8_t code_to_ascii(uint8_t code)
 
 	return kbd_US[code];
 }
+
+uint8_t read_keyboard()
+{
+	if(kbd_wrt_ptr != kbd_rd_ptr) {
+		if(kbd_rd_ptr > 255) {
+			kbd_rd_ptr = 0;
+		}
+
+		uint8_t val = keyboard_buffer[kbd_rd_ptr];
+		kbd_rd_ptr++;
+		return val;
+	}
+
+	return 0;
+}
+
 

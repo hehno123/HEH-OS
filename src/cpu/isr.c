@@ -1,5 +1,6 @@
 #include "../kernel/tty.h"
 #include "../drivers/ports.h"
+#include "../drivers/keyboard.h"
 #include "pic.h"
 #include "idt.h"
 
@@ -52,17 +53,31 @@ void isr_handler(register_t registers)
 				io_wait();
 				uint8_t oki = inb(0x60);
 				io_wait();
-				kprintf("%c\n", code_to_ascii(oki - 1));
+				uint8_t val = code_to_ascii(oki - 1);
+				
+				/* check required for space */
+				if(oki == 0x39) {
+					val = 32;
+				}
+
+				if(val > 0) {	
+					if(kbd_wrt_ptr > 255) {
+						kbd_wrt_ptr = 0;
+					}
+
+					keyboard_buffer[kbd_wrt_ptr] = val;
+					kbd_wrt_ptr++;
+				}
 			}
-		}
 
-		if (registers.err_num >= 8) {
-			outb(0x20, PIC2_COMMAND);
-		}
+			if (registers.err_num >= 8) {
+				outb(0x20, PIC2_COMMAND);
+			}
 
-		outb(0x20, PIC1_COMMAND);
-		io_wait();
-	}
+			outb(0x20, PIC1_COMMAND);
+			io_wait();
+		}
 	
+	}
 }
 
