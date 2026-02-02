@@ -55,19 +55,68 @@ void kernel_main(uint32_t multiboot_struct)
 
 	kprintf("SUPER_BLOCK addr: %X\n", (uint32_t)(super_block));	
 	kprintf("EXT VERSION: %X\n", block->rev_level);
+	kprintf("EXT SIGNATURE: %X\n", block->signature);
+	kprintf("BLOCK SIZE: %X\n", block->block_size);
+	
+	uint32_t group_count = (block->block_count / block->block_per_group);
+	kprintf("COUNT GROUP: %X\n", group_count);
+
+	uint16_t* block_table = (uint16_t*)(kmalloc(1024));
+        read_ata(2052, 2, block_table);
+	
+	struct block_descr_table* block_array = (struct block_descr_table*)(block_table);
+
+	for(int i = 0; i < group_count; i++) {
+		kprintf("BMAP: %d, IMAP: %d, ITABLE: %d\n", block_array[i].bmap_addr, block_array[i].imap_addr, block_array[i].itable_addr);
+	}	
+	
+	uint8_t* imap_table = (uint8_t*)(kmalloc(1024));
+	read_ata(2056, 2, imap_table);
+	uint8_t* inode_table_temp = (uint8_t*)(kmalloc(1024));
+	read_ata(2058, 2, inode_table_temp);
+	
+	kprintf("%X\n", inode_table_temp[128]);
+	kprintf("%X\n", inode_table_temp[129]);
+
+	struct inode_t* inode_table = (struct inode_t*)(inode_table_temp);
+	
+	uint8_t* root_name = (uint8_t*)(kmalloc(1024));
+	kprintf("OKI: %X\n", inode_table[1].block_ptr[0]);
+	read_ata(2048 + (inode_table[1].block_ptr[0] * 2), 2, root_name);
+	
+	uint32_t offset = 0;
+	int count = 0;
+
+	while (offset < 1024 && count < 6) {
+    		struct dir_entry_t* entry = (struct dir_entry_t*)(root_name + offset);
+
+    		char name[256];
+    		memcpy(name, entry->name, entry->name_len);
+    		name[entry->name_len] = 0;
+
+    		kprintf("Inode %d: ", entry->inode);
+		kprintf(name);
+		kprintf("\n");
+		
+    		offset += entry->size;
+		count++;
+	}
 
 	install_idt();
 	keyboard_init();
 	remap_pic(0x20, 0x28);
-
+	
+	kprintf("SIZEOF: %d\n", sizeof(struct inode_t));
 	__asm__ volatile("sti");
 	__asm__ volatile("int $0");
 	
-	kprintf("%c", 32);
+	/*kprintf("%c", 32);
 
 	while(1) {
 		kprintf("%c", read_keyboard());
-	}
+	}*/
+
+	while(1);
 			
 }
 

@@ -44,7 +44,7 @@ struct __attribute__((packed)) block_descr_table {
 	uint32_t free_inodes_count;
 	uint16_t dir_count;
 	uint16_t pad;
-	uint16_t reserved : 12;
+	uint8_t reserved[12];
 };
 
 struct __attribute__((packed)) inode_t {
@@ -65,7 +65,7 @@ struct __attribute__((packed)) inode_t {
 	uint32_t res1;
 	uint32_t res2;
 	uint32_t frag_addr;
-	uint16_t os_val2 : 12;
+	uint8_t os_val2[12];
 };
 
 struct __attribute__((packed)) dir_entry_t {
