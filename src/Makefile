@@ -45,6 +45,6 @@ clean:
 	make -C kernel
 	make -C cpu
 	make -C libc/string
-
+	make -C fs
 
 

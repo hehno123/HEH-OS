@@ -1,12 +1,18 @@
 #ifndef _FS_H
 #define _FS_H
 
+#include <stdint.h>
+
 #define EXT_SYSTEM_CLEAN 1
 #define EXT_SYSTEM_ERR 2
 
 #define EXT_IGNORE_ERR 1
 #define EXT_REMOUNT_ERR 2
 #define EXT_KERNEL_PANIC 3
+
+#define EXT_SIGNATURE 0xEF53
+#define EXT_PARTITION_START 2048
+
 
 struct __attribute__((packed)) fs_superblock {
 	uint32_t inode_count;
@@ -76,5 +82,7 @@ struct __attribute__((packed)) dir_entry_t {
 	uint8_t name[];
 };
 
+void inode_read(uint32_t, struct inode_t*);
+void initialize_fs();
 
 #endif

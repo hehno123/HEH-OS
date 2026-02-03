@@ -48,41 +48,14 @@ void kernel_main(uint32_t multiboot_struct)
 	terminal_init();
 	
 	heap_init((uint32_t*)(mem_palloc((uint32_t*)(&_end - 1))));
-	uint16_t* super_block = (uint16_t *)(kmalloc(1024));
-	read_ata(2050, 2, super_block);
-	
-	struct fs_superblock* block = (struct fs_superblock*)(super_block);
 
-	kprintf("SUPER_BLOCK addr: %X\n", (uint32_t)(super_block));	
-	kprintf("EXT VERSION: %X\n", block->rev_level);
-	kprintf("EXT SIGNATURE: %X\n", block->signature);
-	kprintf("BLOCK SIZE: %X\n", block->block_size);
-	
-	uint32_t group_count = (block->block_count / block->block_per_group);
-	kprintf("COUNT GROUP: %X\n", group_count);
+	initialize_fs();	
+	struct inode_t root_inode;
+	inode_read(2, &root_inode);
 
-	uint16_t* block_table = (uint16_t*)(kmalloc(1024));
-        read_ata(2052, 2, block_table);
-	
-	struct block_descr_table* block_array = (struct block_descr_table*)(block_table);
-
-	for(int i = 0; i < group_count; i++) {
-		kprintf("BMAP: %d, IMAP: %d, ITABLE: %d\n", block_array[i].bmap_addr, block_array[i].imap_addr, block_array[i].itable_addr);
-	}	
-	
-	uint8_t* imap_table = (uint8_t*)(kmalloc(1024));
-	read_ata(2056, 2, imap_table);
-	uint8_t* inode_table_temp = (uint8_t*)(kmalloc(1024));
-	read_ata(2058, 2, inode_table_temp);
-	
-	kprintf("%X\n", inode_table_temp[128]);
-	kprintf("%X\n", inode_table_temp[129]);
-
-	struct inode_t* inode_table = (struct inode_t*)(inode_table_temp);
-	
 	uint8_t* root_name = (uint8_t*)(kmalloc(1024));
-	kprintf("OKI: %X\n", inode_table[1].block_ptr[0]);
-	read_ata(2048 + (inode_table[1].block_ptr[0] * 2), 2, root_name);
+	kprintf("OKI: %X\n", root_inode.block_ptr[0]);
+	read_ata(2048 + (root_inode.block_ptr[0] * 2), 2, root_name);
 	
 	uint32_t offset = 0;
 	int count = 0;
