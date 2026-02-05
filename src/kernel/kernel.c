@@ -9,6 +9,7 @@
 #include "../drivers/keyboard.h"
 #include "mem.h"
 #include "../fs/fs.h"
+#include "shell.h"
 
 extern uint32_t _end;
 #define VIRT_BASE 0xC0000000
@@ -83,13 +84,14 @@ void kernel_main(uint32_t multiboot_struct)
 	__asm__ volatile("sti");
 	__asm__ volatile("int $0");
 	
+	shell_loop();	
 	/*kprintf("%c", 32);
 
 	while(1) {
 		kprintf("%c", read_keyboard());
 	}*/
 
-	while(1);
+	//while(1);
 			
 }
 
