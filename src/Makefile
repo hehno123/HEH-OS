@@ -7,7 +7,7 @@ $(BUILD_DIR)/entry.o: kernel/boot.s
 	i386-elf-as $< -o $@
 
 $(BUILD_DIR)/kernel.o: $(BUILD_DIR)/entry.o ${C_OBJECTS}
-	i386-elf-gcc -T linker.ld -o $@ -ffreestanding -O2 -nostdlib $^ -lgcc
+	i386-elf-gcc -T linker.ld -o $@ -g -ffreestanding -O2 -nostdlib $^ -lgcc
 
 $(BUILD_DIR)/disk.img: $(BUILD_DIR)/kernel.o
 	dd if=/dev/zero of=$@ bs=512 count=131072

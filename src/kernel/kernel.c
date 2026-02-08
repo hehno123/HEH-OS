@@ -51,31 +51,6 @@ void kernel_main(uint32_t multiboot_struct)
 	heap_init((uint32_t*)(mem_palloc((uint32_t*)(&_end - 1))));
 
 	initialize_fs();	
-	struct inode_t root_inode;
-	inode_read(2, &root_inode);
-
-	uint8_t* root_name = (uint8_t*)(kmalloc(1024));
-	kprintf("OKI: %X\n", root_inode.block_ptr[0]);
-	read_ata(2048 + (root_inode.block_ptr[0] * 2), 2, root_name);
-	
-	uint32_t offset = 0;
-	int count = 0;
-
-	while (offset < 1024 && count < 6) {
-    		struct dir_entry_t* entry = (struct dir_entry_t*)(root_name + offset);
-
-    		char name[256];
-    		memcpy(name, entry->name, entry->name_len);
-    		name[entry->name_len] = 0;
-
-    		kprintf("Inode %d: ", entry->inode);
-		kprintf(name);
-		kprintf("\n");
-		
-    		offset += entry->size;
-		count++;
-	}
-
 	install_idt();
 	keyboard_init();
 	remap_pic(0x20, 0x28);

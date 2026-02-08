@@ -233,6 +233,7 @@ uint32_t* kmalloc(uint32_t block_size)
 		}
 
 		list_start = list_start->next_block;
+		kprintf("BLOCK SIZE: %d\n", list_start->next_block);
 	}
 
 	return 0x0;

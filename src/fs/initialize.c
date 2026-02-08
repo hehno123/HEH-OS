@@ -42,8 +42,8 @@ void ext_descr_table_read(uint32_t group_num, uint32_t* bmap, uint32_t* imap, ui
 	read_ata(EXT_PARTITION_START + 4, block_space, block_table);
 	struct block_descr_table* block_array = (struct block_descr_table*)(block_table);
 	
-	kprintf("%d, %d\n", EXT_PARTITION_START + 4, block_space);
-
+	//kprintf("%d, %d\n", EXT_PARTITION_START + 4, block_space);
+	
 	if(group_num > ext_group_count) {
 		kprintf("Incorrect block number\n");
 		return;
@@ -53,7 +53,8 @@ void ext_descr_table_read(uint32_t group_num, uint32_t* bmap, uint32_t* imap, ui
 	*imap = block_array[group_num].imap_addr;
 	*itable = block_array[group_num].itable_addr;
 
-	kprintf("%d, %d, %d\n", *bmap, *imap, *itable);
+	//kprintf("%d, %d, %d\n", *bmap, *imap, *itable);
+	//kfree(block_table);
 }
 
 void inode_read(uint32_t inode_num, struct inode_t* inode)
@@ -61,7 +62,7 @@ void inode_read(uint32_t inode_num, struct inode_t* inode)
 	uint32_t i_gr = find_i_group(inode_num);
 	uint32_t i_ind = find_i_index(inode_num);
 	
-	kprintf("%d, %d\n", i_gr, i_ind);
+	kprintf("%d, %d, %d\n", inode_num, i_gr, i_ind);
 
 	uint32_t bmap_addr, imap_addr, itable_addr;
 	ext_descr_table_read(i_gr, &bmap_addr, &imap_addr, &itable_addr);
@@ -70,6 +71,97 @@ void inode_read(uint32_t inode_num, struct inode_t* inode)
 	read_ata(EXT_PARTITION_START + (itable_addr * (ext_block_size / 512)) + (i_ind / 4), 1, inode_table_temp);
 	struct inode_t* inode_table = (struct inode_t*)(inode_table_temp);
 	*inode = inode_table[i_ind % 4];
+	//kfree(inode_table_temp);
+}
+
+void dir_lookup(struct inode_t* dir, char* child_name, struct inode_t* inode_ret)
+{
+	uint8_t* child_names = (uint8_t*)(kmalloc(1024));
+	kprintf("DIR BLOCK, DIR BLOCK %d\n", dir->block_ptr[0]);
+	for(int i = 0; i < 12; i++) {
+		if(dir->block_ptr[i] == 0)
+			break;
+		
+		kprintf("HEJ WOJTEK");
+		read_ata(EXT_PARTITION_START + (dir->block_ptr[i] * (ext_block_size / 512)), 2, child_names);
+		uint32_t offset = 0;
+		int find = 0;
+		while (offset < 1024) {
+			struct dir_entry_t* entry = (struct dir_entry_t*)(child_names + offset);
+
+			char name[256];
+			memcpy(name, entry->name, entry->name_len);
+			name[entry->name_len] = 0;
+
+			kprintf("%s %d\n", name, entry->inode);
+			uint32_t num = entry->inode;
+
+			if(strcmp(child_name, name) == 0) {
+				inode_read(num, inode_ret);
+				kprintf("ENTRY INODE: %d, NAME: %s\n", num, name);
+				find = 1;
+				break;
+			}
+
+			if(entry->size == 0) {
+				break;
+			}
+
+			offset += entry->size;
+		}
+
+		if(find == 1) {
+			break;
+		}
+	}
+
+	//kfree(child_names);
+}
+
+void namei_at(struct inode_t* start, char* path, struct inode_t* inode_ret)
+{
+	kprintf("PATH: %s\n", path);
+
+	char name[256];
+	char curr_character = path[0];
+	uint32_t curr_len = 0;
+	uint32_t curr_path = 0;
+	struct inode_t* current_inode = start;
+
+	while(curr_character != '\0') {
+		while(curr_character != '/' && curr_character != '\0') {
+			kprintf("%c ", curr_character);
+			name[curr_len] = curr_character;
+			curr_len++;
+			curr_path++;
+			curr_character = path[curr_path];
+		}
+		
+		if(curr_character == '\0')
+			break;
+		
+		name[curr_len] = '\0';
+		kprintf("NAMENAME1: %s\n", name);	
+		dir_lookup(current_inode, name, inode_ret);
+		current_inode = inode_ret;
+		curr_len = 0;
+		curr_path++;
+		curr_character = path[curr_path];
+		kprintf("SCHIZOID");
+	}
+	
+	name[curr_len] = '\0';	
+	kprintf("NAMENAME: %s\n", name);
+	kprintf("%d, %d\n", start, current_inode);
+	dir_lookup(current_inode, name, inode_ret);
+	kprintf("DIR BLOCK %d\n", current_inode->block_ptr[0]);
+}
+
+void namei(char* path, struct inode_t* inode_ret)
+{
+	struct inode_t inode;
+	inode_read(2, &inode);
+	namei_at(&inode, path+1, inode_ret);
 }
 
 

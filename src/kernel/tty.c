@@ -172,6 +172,16 @@ void kprintf(char* format, ...)
 				format_str(value, 16, 1, buf);
 				is_num_format = 1;
 			}
+
+			else if(*format == 's')
+			{
+				terminal_writedata(temp_format, curr_len);
+				char* str = va_arg(args, char*);
+				terminal_printstring(str);
+				format++;
+				temp_format = format;
+				curr_len = 0;
+			}
 			
 			else
 			{

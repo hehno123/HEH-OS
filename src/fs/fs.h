@@ -84,5 +84,6 @@ struct __attribute__((packed)) dir_entry_t {
 
 void inode_read(uint32_t, struct inode_t*);
 void initialize_fs();
+void namei(char*, struct inode_t*);
 
 #endif
