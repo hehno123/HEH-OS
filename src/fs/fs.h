@@ -46,8 +46,8 @@ struct __attribute__((packed)) block_descr_table {
 	uint32_t bmap_addr;
 	uint32_t imap_addr;
 	uint32_t itable_addr;
-	uint32_t free_blocks_count;
-	uint32_t free_inodes_count;
+	uint16_t free_blocks_count;
+	uint16_t free_inodes_count;
 	uint16_t dir_count;
 	uint16_t pad;
 	uint8_t reserved[12];

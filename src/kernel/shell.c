@@ -8,7 +8,7 @@ char current_shell_dir[256];
 void shell_ls()
 {
 	struct inode_t root_inode;
-	namei("/boot", &root_inode);
+	namei("/kucharz", &root_inode);
 	//inode_read(current_shell_inode, &root_inode);
 
 	uint8_t* child_names = (uint8_t*)(kmalloc(1024));

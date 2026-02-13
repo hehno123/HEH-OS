@@ -17,11 +17,13 @@ void initialize_fs()
 	if (block->signature == EXT_SIGNATURE) {
 		kprintf("EXT SIGNATURE FOUNDED\n");
 	}
-	
+		
 	ext_block_size = (block->block_size + 1) * 1024;
 	ext_block_per_group = (block->block_per_group);
 	ext_inodes_per_group = (block->inodes_per_group);
 	ext_group_count = (block->block_count / ext_block_per_group);
+
+	kprintf("INODE PER GROUP: %d\n", ext_inodes_per_group);
 }
 
 uint32_t find_i_group(uint32_t inode_num)
@@ -36,10 +38,10 @@ uint32_t find_i_index(uint32_t inode_num)
 
 void ext_descr_table_read(uint32_t group_num, uint32_t* bmap, uint32_t* imap, uint32_t* itable)
 {
-	uint32_t block_space = (ext_group_count * sizeof(struct block_descr_table)) / 512;
-	block_space++;
-	uint8_t* block_table = (uint8_t*)(kmalloc(block_space));
-	read_ata(EXT_PARTITION_START + 4, block_space, block_table);
+	uint32_t block_space = (ext_group_count * sizeof(struct block_descr_table));
+	uint32_t sectors = (block_space + 511) / 512;
+	uint8_t* block_table = (uint8_t*)(kmalloc(sectors * 512));
+	read_ata(EXT_PARTITION_START + 4, sectors, block_table);
 	struct block_descr_table* block_array = (struct block_descr_table*)(block_table);
 	
 	//kprintf("%d, %d\n", EXT_PARTITION_START + 4, block_space);
@@ -53,7 +55,7 @@ void ext_descr_table_read(uint32_t group_num, uint32_t* bmap, uint32_t* imap, ui
 	*imap = block_array[group_num].imap_addr;
 	*itable = block_array[group_num].itable_addr;
 
-	//kprintf("%d, %d, %d\n", *bmap, *imap, *itable);
+	kprintf("%d, %d, %d\n", *bmap, *imap, *itable);
 	//kfree(block_table);
 }
 
@@ -98,7 +100,7 @@ void dir_lookup(struct inode_t* dir, char* child_name, struct inode_t* inode_ret
 
 			if(strcmp(child_name, name) == 0) {
 				inode_read(num, inode_ret);
-				kprintf("ENTRY INODE: %d, NAME: %s\n", num, name);
+				kprintf("ENTRY INODE: %d, NAME: %s\n %d", num, name, inode_ret->block_ptr[0]);
 				find = 1;
 				break;
 			}
@@ -154,7 +156,7 @@ void namei_at(struct inode_t* start, char* path, struct inode_t* inode_ret)
 	kprintf("NAMENAME: %s\n", name);
 	kprintf("%d, %d\n", start, current_inode);
 	dir_lookup(current_inode, name, inode_ret);
-	kprintf("DIR BLOCK %d\n", current_inode->block_ptr[0]);
+	kprintf("DIR BLOCK %d\n", inode_ret->block_ptr[0]);
 }
 
 void namei(char* path, struct inode_t* inode_ret)

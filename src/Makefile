@@ -19,6 +19,8 @@ $(BUILD_DIR)/disk.img: $(BUILD_DIR)/kernel.o
 	sudo mke2fs -E revision=0 /dev/loop1
 	sudo mount /dev/loop1 /mnt
 	sudo mkdir -p /mnt/boot/grub
+	sudo mkdir -p /mnt/kucharz
+	sudo cp siema.txt /mnt/kucharz/siema.txt
 	sudo cp $^ /mnt/boot 
 	echo 'set debug=all' > grub.cfg
 	echo 'menuentry "myos" {' > grub.cfg
